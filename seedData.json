@@ -1,0 +1,265 @@
+{
+  "foods": [
+    {
+      "id": "f_chicken_breast",
+      "name": "Chicken Breast",
+      "category": "Proteins",
+      "stages": [
+        { "id": "s_cb_fridge", "name": "Fridge (3 day timer)", "daysBefore": 2, "activeTimeMin": 0, "passiveTimeMin": 0 },
+        { "id": "s_cb_season", "name": "Seasoned+Seal", "daysBefore": 1, "activeTimeMin": 15, "passiveTimeMin": 0 },
+        { "id": "s_cb_cook", "name": "Cook/Portion - Ready", "daysBefore": 0, "activeTimeMin": 15, "passiveTimeMin": 240 }
+      ]
+    },
+    {
+      "id": "f_chicken_thighs",
+      "name": "Chicken Thighs",
+      "category": "Proteins",
+      "stages": [
+        { "id": "s_ct_fridge", "name": "Fridge (3 day timer)", "daysBefore": 2, "activeTimeMin": 0, "passiveTimeMin": 0 },
+        { "id": "s_ct_season", "name": "Seasoned+Seal", "daysBefore": 1, "activeTimeMin": 30, "passiveTimeMin": 0 },
+        { "id": "s_ct_cook", "name": "Cook/Portion - Ready", "daysBefore": 0, "activeTimeMin": 15, "passiveTimeMin": 120 }
+      ]
+    },
+    {
+      "id": "f_tilapia",
+      "name": "Tilapia",
+      "category": "Proteins",
+      "stages": [
+        { "id": "s_t_fridge", "name": "Fridge (3 day timer)", "daysBefore": 2, "activeTimeMin": 0, "passiveTimeMin": 0 },
+        { "id": "s_t_season", "name": "Seasoned+Seal", "daysBefore": 1, "activeTimeMin": 15, "passiveTimeMin": 0 },
+        { "id": "s_t_cook", "name": "Cook/Portion - Ready", "daysBefore": 0, "activeTimeMin": 15, "passiveTimeMin": 120 }
+      ]
+    },
+    {
+      "id": "f_egg",
+      "name": "Egg",
+      "category": "Proteins",
+      "stages": [
+        { "id": "s_e_fridge", "name": "Fridge (3 day timer)", "daysBefore": 2, "activeTimeMin": 0, "passiveTimeMin": 0 },
+        { "id": "s_e_cook", "name": "Cook/Portion - Ready", "daysBefore": 0, "activeTimeMin": 15, "passiveTimeMin": 11 }
+      ]
+    },
+    {
+      "id": "f_quinoa",
+      "name": "Quinoa",
+      "category": "Grains",
+      "stages": [
+        { "id": "s_q_dry", "name": "Dry", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
+        { "id": "s_q_cooked", "name": "Cooked", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 15 }
+      ]
+    },
+    {
+      "id": "f_white_rice",
+      "name": "White Rice",
+      "category": "Grains",
+      "stages": [
+        { "id": "s_wr_dry", "name": "Dry", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
+        { "id": "s_wr_cooked", "name": "Cooked", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 20 }
+      ]
+    },
+    {
+      "id": "f_potato",
+      "name": "Potato",
+      "category": "Veggies",
+      "stages": [
+        { "id": "s_p_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
+        { "id": "s_p_prepped", "name": "Peeled/Cut", "daysBefore": 0, "activeTimeMin": 10, "passiveTimeMin": 0 },
+        { "id": "s_p_cooked", "name": "Cooked/Boiled", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 20 }
+      ]
+    },
+    {
+      "id": "f_cauliflower",
+      "name": "Cauliflower",
+      "category": "Veggies",
+      "stages": [
+        { "id": "s_ca_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
+        { "id": "s_ca_cooked", "name": "Cooked", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 15 }
+      ]
+    },
+    {
+      "id": "f_spinach",
+      "name": "Spinach",
+      "category": "Veggies",
+      "stages": [
+        { "id": "s_sp_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
+        { "id": "s_sp_washed", "name": "Washed", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_kale",
+      "name": "Kale",
+      "category": "Veggies",
+      "stages": [
+        { "id": "s_k_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
+        { "id": "s_k_washed", "name": "Washed", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_arugula",
+      "name": "Arugula",
+      "category": "Veggies",
+      "stages": [
+        { "id": "s_ar_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
+        { "id": "s_ar_washed", "name": "Washed", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_tomato",
+      "name": "Tomato",
+      "category": "Veggies",
+      "stages": [
+        { "id": "s_to_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
+        { "id": "s_to_cut", "name": "Cut", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_cucumber",
+      "name": "Cucumber",
+      "category": "Veggies",
+      "stages": [
+        { "id": "s_cu_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
+        { "id": "s_cu_cut", "name": "Cut", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_onion",
+      "name": "Onion",
+      "category": "Veggies",
+      "stages": [
+        { "id": "s_on_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
+        { "id": "s_on_cut", "name": "Cut", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_pepper",
+      "name": "Pepper",
+      "category": "Veggies",
+      "stages": [
+        { "id": "s_pe_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
+        { "id": "s_pe_cut", "name": "Cut", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_jalapeno",
+      "name": "Jalapeño",
+      "category": "Veggies",
+      "stages": [
+        { "id": "s_ja_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
+        { "id": "s_ja_cut", "name": "Cut", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_pantry_generic",
+      "name": "Pantry Item",
+      "category": "Pantry",
+      "stages": [
+        { "id": "s_p_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
+    }
+  ],
+  "inventory": [
+    { "foodId": "f_chicken_breast", "stageQuantities": { "s_cb_fridge": 0, "s_cb_season": 0, "s_cb_cook": 0 } },
+    { "foodId": "f_chicken_thighs", "stageQuantities": { "s_ct_fridge": 0, "s_ct_season": 0, "s_ct_cook": 0 } },
+    { "foodId": "f_tilapia", "stageQuantities": { "s_t_fridge": 0, "s_t_season": 0, "s_t_cook": 0 } },
+    { "foodId": "f_egg", "stageQuantities": { "s_e_fridge": 0, "s_e_cook": 0 } },
+    { "foodId": "f_quinoa", "stageQuantities": { "s_q_dry": 0, "s_q_cooked": 0 } },
+    { "foodId": "f_white_rice", "stageQuantities": { "s_wr_dry": 0, "s_wr_cooked": 0 } },
+    { "foodId": "f_potato", "stageQuantities": { "s_p_raw": 0, "s_p_prepped": 0, "s_p_cooked": 0 } },
+    { "foodId": "f_cauliflower", "stageQuantities": { "s_ca_raw": 0, "s_ca_cooked": 0 } },
+    { "foodId": "f_spinach", "stageQuantities": { "s_sp_raw": 0, "s_sp_washed": 0 } },
+    { "foodId": "f_kale", "stageQuantities": { "s_k_raw": 0, "s_k_washed": 0 } },
+    { "foodId": "f_arugula", "stageQuantities": { "s_ar_raw": 0, "s_ar_washed": 0 } },
+    { "foodId": "f_tomato", "stageQuantities": { "s_to_raw": 0, "s_to_cut": 0 } },
+    { "foodId": "f_cucumber", "stageQuantities": { "s_cu_raw": 0, "s_cu_cut": 0 } },
+    { "foodId": "f_onion", "stageQuantities": { "s_on_raw": 0, "s_on_cut": 0 } },
+    { "foodId": "f_pepper", "stageQuantities": { "s_pe_raw": 0, "s_pe_cut": 0 } },
+    { "foodId": "f_jalapeno", "stageQuantities": { "s_ja_raw": 0, "s_ja_cut": 0 } },
+    { "foodId": "f_pantry_generic", "stageQuantities": { "s_p_ready": 0 } }
+  ],
+  "recipes": [
+    {
+      "id": "r_cava_bowl",
+      "name": "Cava Bowl",
+      "portions": 1,
+      "dishType": "Bowl",
+      "ingredients": [
+        { "foodId": "f_quinoa", "quantityPerPortion": 100 },
+        { "foodId": "f_chicken_thighs", "quantityPerPortion": 150 },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 25, "note": "Chickpeas" },
+        { "foodId": "f_kale", "quantityPerPortion": 30 },
+        { "foodId": "f_spinach", "quantityPerPortion": 15 },
+        { "foodId": "f_cucumber", "quantityPerPortion": 75 },
+        { "foodId": "f_tomato", "quantityPerPortion": 25 },
+        { "foodId": "f_arugula", "quantityPerPortion": 15 },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 70, "note": "Tzatziki" },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 30, "note": "Harissa" },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 15, "note": "Pumpkin seeds" },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 6, "note": "Chia seeds" }
+      ]
+    },
+    {
+      "id": "r_soft_egg_hash",
+      "name": "Soft Egg Hash",
+      "portions": 1,
+      "dishType": "Hash",
+      "ingredients": [
+        { "foodId": "f_potato", "quantityPerPortion": 100 },
+        { "foodId": "f_tilapia", "quantityPerPortion": 75 },
+        { "foodId": "f_egg", "quantityPerPortion": 2 },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 30, "note": "Guac" },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 20, "note": "Harissa" }
+      ]
+    },
+    {
+      "id": "r_pasta_rose",
+      "name": "Pasta Rose",
+      "portions": 5,
+      "dishType": "Pasta",
+      "ingredients": [
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 4, "note": "Olive oil" },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 6, "note": "Garlic" },
+        { "foodId": "f_onion", "quantityPerPortion": 0.2 },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 170, "note": "Tomato sauce" },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 50, "note": "Evaporated milk" }
+      ]
+    },
+    {
+      "id": "r_rattle_snake_pasta",
+      "name": "Rattle Snake Pasta",
+      "portions": 5,
+      "dishType": "Pasta",
+      "ingredients": [
+        { "foodId": "f_chicken_breast", "quantityPerPortion": 150 },
+        { "foodId": "f_cauliflower", "quantityPerPortion": 60 },
+        { "foodId": "f_potato", "quantityPerPortion": 60 },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 100, "note": "2% Milk" },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 5, "note": "Flour" },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 12, "note": "Cheese" },
+        { "foodId": "f_jalapeno", "quantityPerPortion": 0.8 }
+      ]
+    },
+    {
+      "id": "r_chicken_bowl",
+      "name": "Chicken Mexican Bowl",
+      "portions": 5,
+      "dishType": "Bowl",
+      "ingredients": [
+        { "foodId": "f_white_rice", "quantityPerPortion": 100 },
+        { "foodId": "f_chicken_thighs", "quantityPerPortion": 150 },
+        { "foodId": "f_pepper", "quantityPerPortion": 0.6 },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 25, "note": "Corn" },
+        { "foodId": "f_onion", "quantityPerPortion": 0.2 },
+        { "foodId": "f_tomato", "quantityPerPortion": 1 },
+        { "foodId": "f_jalapeno", "quantityPerPortion": 0.2 },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 170, "note": "Beans" }
+      ]
+    }
+  ],
+  "scheduledMeals": [
+    { "id": "m_1", "date": "2026-03-23", "type": "lunch", "recipeId": "r_cava_bowl" },
+    { "id": "m_2", "date": "2026-03-24", "type": "dinner", "recipeId": "r_soft_egg_hash" },
+    { "id": "m_3", "date": "2026-03-25", "type": "dinner", "recipeId": "r_pasta_rose" },
+    { "id": "m_4", "date": "2026-03-26", "type": "lunch", "recipeId": "r_rattle_snake_pasta" },
+    { "id": "m_5", "date": "2026-03-27", "type": "dinner", "recipeId": "r_chicken_bowl" }
+  ]
+}

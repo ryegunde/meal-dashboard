@@ -1,0 +1,212 @@
+MEAL PIPELINE PLANNER - ENGINEERING SPEC
+
+CORE CONCEPT
+This system models food preparation as a pipeline with staged inventory and time-based constraints. 
+Meals are only feasible if ingredients can flow through all required prep stages before the scheduled meal time.
+
+--------------------------------------------------
+
+DATA MODEL
+
+1. FOOD (Atomic Ingredient with Pipeline)
+
+Food {
+  id: string
+  name: string
+  stages: [
+    {
+      id: string
+      name: string
+      daysBefore: number
+      activeTimeMin: number
+      passiveTimeMin: number
+    }
+  ]
+}
+
+Example: Chicken Breast
+- Thaw (2 days before)
+- Season + Seal (1 day before)
+- Cook + Portion (0 days before)
+
+--------------------------------------------------
+
+2. INVENTORY
+
+InventoryItem {
+  foodId: string
+  stageQuantities: {
+    [stageId]: number
+  }
+}
+
+Example:
+Chicken:
+- Frozen: 5
+- Thawed: 2
+- Seasoned: 1
+- Cooked: 3
+
+--------------------------------------------------
+
+3. RECIPE
+
+Recipe {
+  id: string
+  name: string
+  portions: number
+  dishType: string
+
+  ingredients: [
+    {
+      foodId: string
+      quantityPerPortion: number
+    }
+  ]
+}
+
+--------------------------------------------------
+
+4. SCHEDULED MEAL
+
+ScheduledMeal {
+  date: string
+  type: "lunch" | "dinner"
+  recipeId: string
+}
+
+--------------------------------------------------
+
+MEAL STATUS LOGIC (COLOR SYSTEM)
+
+For each ingredient:
+
+1. READY (GREEN)
+If final stage quantity >= required
+
+2. NEEDS PREP (BLUE)
+If total quantity across all stages >= required
+
+3. BLOCKED (RED)
+If total quantity < required
+
+Final meal color:
+- Green: all ingredients ready
+- Blue: ingredients exist but need prep
+- Red: missing ingredients
+
+--------------------------------------------------
+
+TIME-AWARE PIPELINE VALIDATION
+
+For each stage:
+stageDate = mealDate - daysBefore
+
+Requirement:
+Each stage must have sufficient quantity available BEFORE its required date.
+
+Failure Example:
+If thaw stage requires March 23 but no frozen inventory exists on that date,
+the meal is BLOCKED even if inventory exists later.
+
+--------------------------------------------------
+
+TASK GENERATION
+
+For each meal and ingredient:
+
+taskDate = mealDate - daysBefore
+
+Task {
+  date
+  foodId
+  stageId
+  quantity
+  totalActiveTime
+  totalPassiveTime
+}
+
+Tasks for same food + stage + date should be merged.
+
+--------------------------------------------------
+
+DASHBOARD
+
+1. TODAY TASKS
+List all tasks due today
+
+2. TOMORROW TASKS
+Preview upcoming work
+
+3. TIME LOAD
+Total active time per day
+
+If totalActiveTime > 60 minutes:
+Display warning
+
+--------------------------------------------------
+
+INVENTORY UPDATE WORKFLOW
+
+User updates inventory by stage:
+
+Example:
++5 chicken added to Frozen stage
+
+User can distribute quantities across stages manually.
+
+--------------------------------------------------
+
+CALENDAR BEHAVIOR
+
+Each day displays:
+- Lunch meal
+- Dinner meal
+
+Color rules:
+- Green: fully ready
+- Blue: needs prep
+- Red: blocked
+
+Clicking a meal shows:
+- Missing ingredients
+- Required vs available quantities
+
+--------------------------------------------------
+
+CORE ENGINE RULES
+
+1. Inventory is stage-based
+2. All calculations are time-aware
+3. Simulation runs forward chronologically
+4. Tasks are derived automatically
+5. No manual task creation
+
+--------------------------------------------------
+
+MVP SCOPE
+
+Phase 1:
+- Foods with stages
+- Recipes
+- Inventory (stage quantities)
+- Calendar with color logic (non-time-aware)
+- Basic task generation
+
+Phase 2:
+- Time-aware validation
+- Task merging
+- Time estimation
+- Overload warnings
+
+--------------------------------------------------
+
+SYSTEM MODEL
+
+This system functions like a manufacturing pipeline:
+
+- Ingredients = raw materials
+- Tasks = production steps
+- Meals = delivery deadlines
+
+The goal is to ensure all pipelines complete before deadlines.

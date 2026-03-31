@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Pipeline Planner</title>
+    <!-- Modern Typography: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="ph ph-bowl-food"></i>
+                <span>PrepFlow</span>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-view="calendar"><i class="ph ph-calendar-blank"></i> Calendar</li>
+                <li data-view="dashboard"><i class="ph ph-check-square-offset"></i> Dashboard</li>
+                <li data-view="inventory"><i class="ph ph-package"></i> Inventory</li>
+                <li data-view="recipes"><i class="ph ph-book-open-text"></i> Recipes</li>
+                <li data-view="foods"><i class="ph ph-carrot"></i> Foods</li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="topbar">
+                <h1 id="view-title">Calendar Plan</h1>
+                <div class="date-range" id="header-date">Mar 23 - Mar 29, 2026</div>
+            </header>
+
+            <div class="view-container" id="view-container">
+                <!-- Views will be injected here via JS -->
+            </div>
+        </main>
+
+        <!-- Slide-out Debug Panel -->
+        <aside class="debug-panel" id="debug-panel">
+            <div class="panel-header">
+                <h2>Meal Details</h2>
+                <button id="close-panel" class="icon-btn"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="panel-content" id="debug-content">
+                <!-- Active debug info injected here -->
+                <div class="empty-state">Select a meal on the calendar to see details.</div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- View Templates -->
+    <template id="tpl-calendar">
+        <div class="calendar-grid" id="calendar-grid">
+            <!-- Days rendered via JS -->
+        </div>
+    </template>
+
+    <template id="tpl-recipes">
+        <div class="recipes-view">
+            <div class="view-header-actions">
+                <h2>Recipe Library</h2>
+                <button class="btn btn-primary" id="btn-add-recipe"><i class="ph ph-plus"></i> Add Recipe</button>
+            </div>
+            <div class="recipe-list" id="recipe-list">
+                <!-- Recipes rendered via JS -->
+            </div>
+            
+            <!-- Recipe Builder Modal -->
+            <div class="modal-overlay hidden" id="recipe-modal">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h2>Create Recipe</h2>
+                        <button class="icon-btn" id="close-recipe-modal"><i class="ph ph-x"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Recipe Name</label>
+                            <input type="text" id="recipe-name" placeholder="e.g. CAVA Style Bowl">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Portions</label>
+                                <input type="number" id="recipe-portions" min="1" value="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Dish Type</label>
+                                <input type="text" id="recipe-dish-type" placeholder="e.g. Bowl">
+                            </div>
+                        </div>
+                        
+                        <div class="ingredients-section">
+                            <h3>Ingredients</h3>
+                            <div id="ingredient-builder-list" class="ingredient-builder-list">
+                                <!-- Selected ingredients go here -->
+                            </div>
+                            <button class="btn btn-ghost" id="btn-add-ingredient"><i class="ph ph-plus"></i> Add Ingredient</button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="btn-save-recipe">Save Recipe</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-inventory">
+        <div class="inventory-view">
+            <div class="view-header-actions" style="margin-bottom: 24px;">
+                <div>
+                    <h2>Raw Material Execution Inventory</h2>
+                    <p style="color: var(--text-secondary); margin-top: 4px; font-size: 14px;">Update exact stage quantities manually to reflect physical reality.</p>
+                </div>
+            </div>
+            <div id="inventory-list" style="display: flex; flex-direction: column; gap: 16px;">
+                <!-- Built via JS -->
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-foods">
+        <div class="foods-view recipes-view">
+            <div class="view-header-actions">
+                <h2>Raw Material Pipeline (Foods)</h2>
+                <button class="btn btn-primary" id="btn-add-food"><i class="ph ph-plus"></i> Add Food</button>
+            </div>
+            <div class="food-list recipe-list" id="food-list">
+                <!-- Foods rendered via JS -->
+            </div>
+            
+            <!-- Food Builder Modal -->
+            <div class="modal-overlay hidden" id="food-modal">
+                <div class="modal" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h2>Define Food Pipeline</h2>
+                        <button class="icon-btn" id="close-food-modal"><i class="ph ph-x"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Food Name</label>
+                                <input type="text" id="food-name" placeholder="e.g. Salmon">
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                <input type="text" id="food-category" placeholder="e.g. Proteins" list="category-list">
+                                <datalist id="category-list">
+                                    <option value="Proteins"></option>
+                                    <option value="Veggies"></option>
+                                    <option value="Grains"></option>
+                                    <option value="Fruits"></option>
+                                    <option value="Fermented"></option>
+                                </datalist>
+                            </div>
+                        </div>
+                        
+                        <div class="stages-section">
+                            <h3>Pipeline Stages</h3>
+                            <p style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">Define stages from start to finish (e.g. Frozen -> Thawed -> Cooked)</p>
+                            <div id="stage-builder-list" class="stage-builder-list">
+                                <!-- Stages go here -->
+                            </div>
+                            <button class="btn btn-ghost" id="btn-add-stage"><i class="ph ph-plus"></i> Add Stage</button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="btn-save-food">Save Food Pipeline</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Meal Selection Modal (for Calendar) -->
+    <div class="modal-overlay hidden" id="meal-picker-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="meal-picker-title">Assign Meal</h2>
+                <button class="icon-btn" id="close-meal-picker"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="recipe-selector-grid" id="recipe-picker-list">
+                    <!-- Recipes generated via JS -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="btn-clear-meal" style="color: var(--color-red); border-color: var(--color-red);">Remove Meal</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

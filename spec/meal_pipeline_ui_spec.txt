@@ -1,0 +1,264 @@
+MEAL PIPELINE PLANNER - UI / UX USER STORY SPEC
+
+OBJECTIVE
+Define exact user flows and UI behavior for all core interactions.
+This spec focuses on how the user moves through the system and what the UI must do at each step.
+
+--------------------------------------------------
+
+PRIMARY SCREENS
+
+1. Food / Pipeline Builder
+2. Recipe Builder
+3. Inventory Manager
+4. Calendar (Core Planning Surface)
+5. Dashboard (Execution View)
+
+--------------------------------------------------
+
+USER STORY 1: CREATE FOOD WITH PIPELINE
+
+User Goal:
+Define a reusable ingredient with prep stages.
+
+Flow:
+1. Navigate to "Food"
+2. Click "Add Food"
+3. Enter:
+   - Name (e.g., Chicken Breast)
+
+4. Add stages:
+   - Click "Add Stage"
+   - Input:
+     - Stage name
+     - Days before meal
+     - Active time
+     - Passive time
+
+5. Reorder stages via drag (optional)
+
+6. Save
+
+UI Requirements:
+- Stages displayed vertically as a pipeline
+- Clear “days before” labeling
+- Running total time shown
+
+--------------------------------------------------
+
+USER STORY 2: CREATE RECIPE
+
+User Goal:
+Define a meal composed of foods.
+
+Flow:
+1. Navigate to "Recipes"
+2. Click "Add Recipe"
+3. Enter:
+   - Name
+   - Portions
+   - Dish type
+
+4. Add ingredients:
+   - Search/select Food
+   - Enter quantity per portion
+
+5. Save
+
+UI Requirements:
+- Ingredient picker dropdown
+- Quantity inline editable
+- Show derived total per recipe
+
+--------------------------------------------------
+
+USER STORY 3: UPDATE INVENTORY
+
+User Goal:
+Represent current real-world food state.
+
+Flow:
+1. Navigate to "Inventory"
+2. View list of all Foods
+
+For each food:
+3. Expand item
+4. Input quantity per stage
+
+Example:
+Chicken:
+- Frozen: 5
+- Thawed: 2
+- Cooked: 3
+
+5. Save automatically on change
+
+UI Requirements:
+- Table format
+- Each stage as a column or row
+- Inline editable numbers
+- No save button required (auto-save)
+
+--------------------------------------------------
+
+USER STORY 4: PLAN MEALS (CALENDAR)
+
+User Goal:
+Assign meals across date ranges and immediately see feasibility.
+
+Flow:
+1. Navigate to Calendar
+2. Select date range (drag or start/end picker)
+
+3. Choose:
+   - Recipe
+   - Meal type (lunch/dinner)
+
+4. Click "Apply"
+
+System Behavior:
+- Expand into daily meals
+- Immediately simulate inventory + pipeline
+- Color each meal
+
+UI Requirements:
+Calendar Cell:
+[Date]
+L: Meal Name (color)
+D: Meal Name (color)
+
+Colors:
+- Green: ready
+- Blue: needs prep
+- Red: blocked
+
+--------------------------------------------------
+
+USER STORY 5: DEBUG BLOCKED MEAL
+
+User Goal:
+Understand why a meal is not feasible.
+
+Flow:
+1. Click red meal in calendar
+
+System shows:
+- Ingredient list
+- Required vs available
+- Deficit values
+
+UI:
+Inline expandable panel:
+
+Example:
+CAVA Bowl (Dinner)
+
+Missing:
+- Chicken: need 200g, have 120g
+- Spinach: need 50g, have 0g
+
+--------------------------------------------------
+
+USER STORY 6: DAILY EXECUTION (DASHBOARD)
+
+User Goal:
+Know exactly what to do today.
+
+Flow:
+1. Open Dashboard
+
+System displays:
+
+SECTION: TODAY TASKS
+- Grouped by food
+- Show stage + quantity
+- Show time
+
+SECTION: TOMORROW PREVIEW
+
+SECTION: TIME LOAD
+- Total active time
+- Warning if > 60 min
+
+UI Requirements:
+- Chronological order
+- Minimal text
+- High visibility for warnings
+
+--------------------------------------------------
+
+USER STORY 7: GROCERY UPDATE
+
+User Goal:
+Update inventory after shopping/delivery.
+
+Flow:
+1. Go to Inventory
+2. Add quantities to appropriate stage
+
+Example:
+Chicken:
++5 → Frozen
+
+UI Requirements:
+- Fast numeric input
+- No friction
+- Immediate state update
+
+--------------------------------------------------
+
+USER STORY 8: SYSTEM FEEDBACK LOOP
+
+User Flow:
+1. Plan meals
+2. See red cells
+3. Click to debug
+4. Update inventory or change plan
+5. Repeat until all feasible
+
+System Goal:
+Tight feedback loop under 10 seconds
+
+--------------------------------------------------
+
+UX PRINCIPLES (NON-NEGOTIABLE)
+
+1. ZERO NAVIGATION FRICTION
+- Core info always visible
+- Max 1 click to insight
+
+2. IMMEDIATE FEEDBACK
+- No “run simulation” button
+- Everything updates instantly
+
+3. VISUAL PRIORITY
+- Red = problem
+- Blue = work needed
+- Green = done
+
+4. MINIMAL INPUT COST
+- Inline editing
+- No forms where avoidable
+
+--------------------------------------------------
+
+MVP UI PRIORITY
+
+Build in this order:
+
+1. Calendar (read-only hardcoded)
+2. Color logic
+3. Click-to-debug panel
+4. Inventory editor
+5. Recipe builder
+6. Food pipeline builder
+7. Dashboard
+
+--------------------------------------------------
+
+FINAL NOTE
+
+The calendar is the PRIMARY INTERFACE.
+The dashboard is the EXECUTION INTERFACE.
+
+Everything else exists to support those two surfaces.

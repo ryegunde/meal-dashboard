@@ -9,6 +9,7 @@ const STATE = {
     computedMeals: [],
     currentWeekStart: null // Date object for Sunday of the active week
 };
+window.STATE = STATE;
 
 const STORAGE_KEY = 'PREPFLOW_DATA_V1';
 
@@ -41,6 +42,9 @@ async function initApp() {
         sunday.setHours(0, 0, 0, 0);
         STATE.currentWeekStart = sunday;
 
+        // 3. Midnight Cleanup (Subtract past meals from inventory)
+        processMidnightCleanup();
+
         runSimulation();
         renderView('calendar');
         setupEventListeners();
@@ -60,6 +64,62 @@ function saveState() {
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
 }
+
+// 1.5. Midnight Cleanup Logic
+function processMidnightCleanup() {
+    try {
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        let changed = false;
+
+        console.log(`Checking midnight cleanup for: ${todayStr}`);
+
+        STATE.scheduledMeals.forEach(meal => {
+            // If meal is in the past and hasn't been consumed yet
+            if (meal.date < todayStr && !meal.consumed) {
+                const recipe = STATE.recipes.find(r => r.id === meal.recipeId);
+                if (recipe) {
+                    recipe.ingredients.forEach(req => {
+                        const food = STATE.foods.find(f => f.id === req.foodId);
+                        const inv = STATE.inventory.find(i => i.foodId === req.foodId);
+                        if (food && inv && food.stages && food.stages.length > 0) {
+                            // Subtract from the FINAL stage of the food pipeline
+                            const finalStage = food.stages[food.stages.length - 1];
+                            const finalStageId = finalStage.id;
+                            const neededQuantity = req.quantityPerPortion * recipe.portions;
+                            
+                            if (inv.stageQuantities[finalStageId] !== undefined) {
+                                const oldVal = inv.stageQuantities[finalStageId];
+                                inv.stageQuantities[finalStageId] = Math.max(0, oldVal - neededQuantity);
+                                changed = true;
+                                console.log(`  - Subtracted ${neededQuantity} of ${food.name} (Stage: ${finalStage.name})`);
+                            }
+                        }
+                    });
+                }
+                meal.consumed = true;
+                changed = true;
+                console.log(`  - Marked meal ${meal.id} (${meal.recipeId}) as consumed`);
+            }
+        });
+
+        if (changed) {
+            saveState();
+            runSimulation();
+            // If the current view is inventory or calendar, we might want to re-render
+            const activeNav = document.querySelector('.nav-links li.active');
+            if (activeNav) {
+                renderView(activeNav.getAttribute('data-view'));
+            }
+        }
+    } catch (err) {
+        console.error("Critical error in processMidnightCleanup:", err);
+    }
+}
+window.processMidnightCleanup = processMidnightCleanup;
+
+// Check for midnight every minute
+setInterval(processMidnightCleanup, 60000);
 
 // 2. Simplistic Phase 1 Simulation (Non-time-aware)
 // Goal: Check if total inventory across all stages >= required.

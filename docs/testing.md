@@ -10,6 +10,7 @@ The test suite is located in the `[tests/](file:///c:/src/Antigravity/meal-dashb
 -   **`calendar.spec.js`**: Tests calendar navigation and meal scheduling interactions.
 -   **`engine.spec.js`**: Validates the core simulation engine's logic (Green/Blue/Red statuses).
 -   **`scheduling.spec.js`**: Ensures that scheduled meals are correctly saved and rendered.
+-   **`cleanup.spec.js`**: Verifies the automatic midnight inventory subtraction for past meals.
 
 ## Running Tests Locally
 

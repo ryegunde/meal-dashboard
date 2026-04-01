@@ -20,6 +20,13 @@ The application state is managed in a single `STATE` object in `main.js`, compri
 -   **Scheduled Meals**: A collection of meals assigned to specific dates and types (Breakfast, Lunch, Dinner).
 -   **Computed Meals**: The result of the simulation engine, adding status (Green/Blue/Red) and missing ingredient details to scheduled meals.
 
+## Automatic Midnight Cleanup
+
+The application features an automatic "midnight cleanup" logic that runs on startup and every minute while the app is open:
+-   It identifies "past meals" (scheduled dates before today) that haven't been processed.
+-   It automatically subtracts the required ingredients from the **final stage** of the corresponding food's inventory.
+-   Once processed, meals are marked as `consumed: true` to prevent double-deduction.
+
 ## Core Logic: Simulation Engine
 
 The `runSimulation()` function in `main.js` is the heart of the application. It evaluates each scheduled meal by:

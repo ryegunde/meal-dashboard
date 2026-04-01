@@ -45,6 +45,7 @@ async function initApp() {
         renderView('calendar');
         setupEventListeners();
         setupNavigation();
+        document.body.setAttribute('data-app-ready', 'true');
     } catch(err) {
         console.error("Failed to initialize app", err);
     }
@@ -97,13 +98,14 @@ function runSimulation() {
                     have: totalAvailable,
                     deficit: neededQuantity - totalAvailable
                 });
-            } else if (finalStageAvailable < neededQuantity && mealStatus !== 'Red') {
-                mealStatus = 'Blue'; // Needs prep
+            } else if (finalStageAvailable < neededQuantity) {
+                if (mealStatus !== 'Red') mealStatus = 'Blue';
                 missingIngredients.push({
                     foodName: food ? food.name : req.foodId,
                     needed: neededQuantity,
-                    haveInFinalStage: finalStageAvailable,
-                    statusMsg: 'Needs prep (in earlier stages)'
+                    have: totalAvailable,
+                    deficit: 0,
+                    needsPrep: true
                 });
             }
         }
@@ -843,23 +845,13 @@ function openDebugPanel(mealId) {
     } else {
         html += `<div class="ingredient-list">`;
         meal.missing.forEach(req => {
-            let details = '';
-            if(req.deficit > 0) {
-                details = `
-                    <div class="req-stat error">Have: ${req.have}</div>
-                    <div class="req-stat">Need: ${req.needed}</div>
-                    <div class="req-stat">Deficit: -${req.deficit}</div>
-                `;
-            } else {
-                details = `
-                    <div class="req-stat warning">Needs Prep</div>
-                `;
-            }
             html += `
                 <div class="ingredient-req">
                     <h4>${req.foodName}</h4>
                     <div class="req-stats">
-                        ${details}
+                        <div class="req-stat ${req.deficit > 0 ? 'error' : 'warning'}">Have: ${req.have}</div>
+                        <div class="req-stat">Need: ${req.needed}</div>
+                        ${req.deficit > 0 ? `<div class="req-stat">Deficit: -${req.deficit}</div>` : `<div class="req-stat warning">Needs Prep</div>`}
                     </div>
                 </div>
             `;

@@ -6,26 +6,58 @@ const STATE = {
     inventory: [],
     recipes: [],
     scheduledMeals: [],
-    computedMeals: []
+    computedMeals: [],
+    currentWeekStart: null // Date object for Sunday of the active week
 };
+
+const STORAGE_KEY = 'PREPFLOW_DATA_V1';
 
 // 1. Core Logic & Data loading
 async function initApp() {
     try {
-        const res = await fetch('seedData.json');
-        const data = await res.json();
+        // 1. Load from localStorage or seedData
+        const saved = localStorage.getItem(STORAGE_KEY);
+        let data;
         
-        STATE.foods = data.foods;
-        STATE.inventory = data.inventory;
-        STATE.recipes = data.recipes;
-        STATE.scheduledMeals = data.scheduledMeals;
+        if (saved) {
+            data = JSON.parse(saved);
+            console.log("Loaded data from localStorage");
+        } else {
+            const res = await fetch('seedData.json');
+            data = await res.json();
+            console.log("Loaded fallback seed data");
+        }
         
+        STATE.foods = data.foods || [];
+        STATE.inventory = data.inventory || [];
+        STATE.recipes = data.recipes || [];
+        STATE.scheduledMeals = data.scheduledMeals || [];
+        
+        // 2. Initialize Calendar Date (Start of current week)
+        const now = new Date();
+        const day = now.getDay(); // 0 (Sun) to 6 (Sat)
+        const sunday = new Date(now);
+        sunday.setDate(now.getDate() - day);
+        sunday.setHours(0, 0, 0, 0);
+        STATE.currentWeekStart = sunday;
+
         runSimulation();
         renderView('calendar');
         setupEventListeners();
+        setupNavigation();
     } catch(err) {
-        console.error("Failed to load initial data", err);
+        console.error("Failed to initialize app", err);
     }
+}
+
+function saveState() {
+    const dataToSave = {
+        foods: STATE.foods,
+        inventory: STATE.inventory,
+        recipes: STATE.recipes,
+        scheduledMeals: STATE.scheduledMeals
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
 }
 
 // 2. Simplistic Phase 1 Simulation (Non-time-aware)
@@ -124,19 +156,30 @@ function renderCalendar() {
     if(!grid) return;
     grid.innerHTML = '';
 
-    // Generate upcoming 7 days starting from today (simulated as Mar 23)
-    const baseDate = new Date('2026-03-23T12:00:00'); 
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const mealTypes = ['breakfast', 'lunch', 'dinner'];
 
+    // Update Header Date Range
+    const weekEnd = new Date(STATE.currentWeekStart);
+    weekEnd.setDate(STATE.currentWeekStart.getDate() + 6);
+    
+    const startStr = `${months[STATE.currentWeekStart.getMonth()]} ${STATE.currentWeekStart.getDate()}`;
+    const endStr = `${months[weekEnd.getMonth()]} ${weekEnd.getDate()}, ${weekEnd.getFullYear()}`;
+    document.getElementById('header-date').textContent = `${startStr} - ${endStr}`;
+
     for(let i=0; i<7; i++) {
-        const targetDate = new Date(baseDate);
-        targetDate.setDate(baseDate.getDate() + i);
+        const targetDate = new Date(STATE.currentWeekStart);
+        targetDate.setDate(STATE.currentWeekStart.getDate() + i);
         
         const dateStr = targetDate.toISOString().split('T')[0]; // YYYY-MM-DD
         const daySlot = document.createElement('div');
         daySlot.className = 'day-column';
         
+        // Highlight "Today"
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (dateStr === todayStr) daySlot.classList.add('is-today');
+
         let slotsHtml = '';
         mealTypes.forEach(type => {
             const meal = STATE.computedMeals.find(m => m.date === dateStr && m.type === type);
@@ -231,8 +274,29 @@ function openMealPicker(mealId = null) {
         clearBtn.classList.add('hidden');
     }
 
+    modal.classList.remove('hidden');
+
+    // Search Logic
+    const searchInput = document.getElementById('recipe-search-input');
+    searchInput.value = '';
+    searchInput.focus();
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        const filtered = STATE.recipes.filter(r => 
+            r.name.toLowerCase().includes(query) || 
+            r.dishType.toLowerCase().includes(query)
+        );
+        renderPickerList(filtered);
+    });
+
+    renderPickerList(STATE.recipes);
+}
+
+function renderPickerList(recipes) {
+    const list = document.getElementById('recipe-picker-list');
     let html = '';
-    STATE.recipes.forEach(recipe => {
+    recipes.forEach(recipe => {
         html += `
             <div class="recipe-picker-item" data-recipe-id="${recipe.id}">
                 <div>
@@ -243,8 +307,7 @@ function openMealPicker(mealId = null) {
             </div>
         `;
     });
-    list.innerHTML = html;
-    modal.classList.remove('hidden');
+    list.innerHTML = html || `<div style="text-align:center; padding: 20px; color: var(--text-secondary);">No recipes found matching your search.</div>`;
 }
 
 function saveScheduledMeal(recipeId) {
@@ -267,12 +330,30 @@ function saveScheduledMeal(recipeId) {
 
     runSimulation();
     renderCalendar();
+    saveState();
 }
 
 function deleteScheduledMeal(mealId) {
     STATE.scheduledMeals = STATE.scheduledMeals.filter(m => m.id !== mealId);
     runSimulation();
     renderCalendar();
+    saveState();
+}
+
+function setupNavigation() {
+    const prev = document.getElementById('prev-week');
+    const next = document.getElementById('next-week');
+    if(!prev || !next) return;
+
+    prev.addEventListener('click', () => {
+        STATE.currentWeekStart.setDate(STATE.currentWeekStart.getDate() - 7);
+        renderCalendar();
+    });
+
+    next.addEventListener('click', () => {
+        STATE.currentWeekStart.setDate(STATE.currentWeekStart.getDate() + 7);
+        renderCalendar();
+    });
 }
 
 // --- RECIPES MODULE ---
@@ -364,6 +445,7 @@ function deleteRecipe(recipeId) {
     
     renderRecipes();
     runSimulation();
+    saveState();
 }
 
 function addIngredientRow(ingredient = null) {
@@ -429,6 +511,7 @@ function saveRecipe() {
     document.getElementById('recipe-modal').classList.add('hidden');
     renderRecipes();
     runSimulation(); // Re-run simulation in case rules changed
+    saveState();
 }
 
 // --- FOODS MODULE ---
@@ -523,6 +606,7 @@ function deleteFood(foodId) {
     
     renderFoods();
     runSimulation();
+    saveState();
 }
 
 function addStageRow(stage = null) {
@@ -612,6 +696,7 @@ function saveFood() {
     document.getElementById('food-modal').classList.add('hidden');
     renderFoods();
     runSimulation();
+    saveState();
 }
 
 // --- INVENTORY MODULE ---
@@ -706,6 +791,7 @@ function renderInventory() {
             if (inv) {
                 inv.stageQuantities[stageId] = newQty;
                 runSimulation();
+                saveState();
                 
                 // Live update the Total sum in the accordion header
                 let newTotal = 0;

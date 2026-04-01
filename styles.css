@@ -127,14 +127,35 @@ body {
     letter-spacing: -0.5px;
 }
 
-.date-range {
-    color: var(--text-secondary);
-    font-size: 14px;
-    font-weight: 500;
+.calendar-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-arrow {
     background: var(--bg-panel);
-    padding: 6px 16px;
-    border-radius: 20px;
     border: 1px solid var(--border-color);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--trans-fast);
+}
+.nav-arrow:hover {
+    background: var(--bg-hover);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.date-range {
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 180px;
+    text-align: center;
 }
 
 .view-container {
@@ -159,6 +180,25 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
+}
+
+.day-column.is-today {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 1px var(--color-accent);
+}
+.day-column.is-today::after {
+    content: 'Today';
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    background: var(--color-accent);
+    color: white;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 10px;
+    text-transform: uppercase;
 }
 
 .day-header {
@@ -527,6 +567,29 @@ input:focus, select:focus {
     padding: 4px;
 }
 .ingredient-builder-item .btn-remove:hover { color: #fff; }
+
+/* Modal Search Box */
+.search-box {
+    position: relative;
+    margin-bottom: 16px;
+}
+.search-box i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+.search-box input {
+    width: 100%;
+    padding-left: 38px;
+    background: var(--bg-hover);
+    border-color: transparent;
+}
+.search-box input:focus {
+    background: var(--bg-main);
+}
 
 .stage-builder-item {
     display: flex;

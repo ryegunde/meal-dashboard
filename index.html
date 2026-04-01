@@ -33,7 +33,11 @@
         <main class="main-content">
             <header class="topbar">
                 <h1 id="view-title">Calendar Plan</h1>
-                <div class="date-range" id="header-date">Mar 23 - Mar 29, 2026</div>
+                <div class="calendar-nav" id="calendar-nav">
+                    <button class="icon-btn nav-arrow" id="prev-week"><i class="ph ph-caret-left"></i></button>
+                    <div class="date-range" id="header-date">Mar 23 - Mar 29, 2026</div>
+                    <button class="icon-btn nav-arrow" id="next-week"><i class="ph ph-caret-right"></i></button>
+                </div>
             </header>
 
             <div class="view-container" id="view-container">
@@ -185,6 +189,10 @@
                 <button class="icon-btn" id="close-meal-picker"><i class="ph ph-x"></i></button>
             </div>
             <div class="modal-body">
+                <div class="search-box">
+                    <i class="ph ph-magnifying-glass"></i>
+                    <input type="text" id="recipe-search-input" placeholder="Search recipes by name or type...">
+                </div>
                 <div class="recipe-selector-grid" id="recipe-picker-list">
                     <!-- Recipes generated via JS -->
                 </div>

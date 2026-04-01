@@ -77,7 +77,7 @@
             
             <!-- Recipe Builder Modal -->
             <div class="modal-overlay hidden" id="recipe-modal">
-                <div class="modal">
+                <div class="modal modal-lg">
                     <div class="modal-header">
                         <h2>Create Recipe</h2>
                         <button class="icon-btn" id="close-recipe-modal"><i class="ph ph-x"></i></button>
@@ -140,7 +140,7 @@
             
             <!-- Food Builder Modal -->
             <div class="modal-overlay hidden" id="food-modal">
-                <div class="modal" style="max-width: 600px;">
+                <div class="modal modal-lg">
                     <div class="modal-header">
                         <h2>Define Food Pipeline</h2>
                         <button class="icon-btn" id="close-food-modal"><i class="ph ph-x"></i></button>
@@ -161,6 +161,10 @@
                                     <option value="Fruits"></option>
                                     <option value="Fermented"></option>
                                 </datalist>
+                            </div>
+                            <div class="form-group" style="max-width: 140px;">
+                                <label>Portion Size (g)</label>
+                                <input type="number" id="food-portion-size" placeholder="e.g. 150" min="0">
                             </div>
                         </div>
                         

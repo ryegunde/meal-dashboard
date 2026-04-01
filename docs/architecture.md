@@ -27,6 +27,13 @@ The application features an automatic "midnight cleanup" logic that runs on star
 -   It automatically subtracts the required ingredients from the **final stage** of the corresponding food's inventory.
 -   Once processed, meals are marked as `consumed: true` to prevent double-deduction.
 
+## Enhanced Meal Details & Interactivity
+
+The meal details panel provides a comprehensive view of ingredients and allows for quick navigation:
+-   **Ingredient Listing**: Lists *all* ingredients for a recipe, showing current inventory levels, required amounts, and statuses (Ready, Needs Prep, or Deficit).
+-   **Portion-Based Management**: For specific foods (like meal-prepped proteins), users can define a `portionSize` (e.g., 150g). The Inventory view then allows entering quantities in "portions" (containers) which are automatically converted to grams for precise simulation tracking.
+-   **Dynamic Header Navigation**: The week-based navigation (prev/next week and date range) is context-aware and automatically hides when the user switches to non-calendar views like Inventory or Foods.
+
 ## Core Logic: Simulation Engine
 
 The `runSimulation()` function in `main.js` is the heart of the application. It evaluates each scheduled meal by:

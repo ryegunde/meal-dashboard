@@ -130,7 +130,7 @@ function runSimulation() {
         if(!recipe) return { ...meal, status: 'Red', missing: [] };
 
         let mealStatus = 'Green';
-        let missingIngredients = [];
+        let allIngredients = [];
 
         for (const req of recipe.ingredients) {
             const food = STATE.foods.find(f => f.id === req.foodId);
@@ -150,31 +150,31 @@ function runSimulation() {
                 });
             }
             
+            let status = 'success';
             if (totalAvailable < neededQuantity) {
                 mealStatus = 'Red'; // Missing entirely
-                missingIngredients.push({
-                    foodName: food ? food.name : req.foodId,
-                    needed: neededQuantity,
-                    have: totalAvailable,
-                    deficit: neededQuantity - totalAvailable
-                });
+                status = 'error';
             } else if (finalStageAvailable < neededQuantity) {
                 if (mealStatus !== 'Red') mealStatus = 'Blue';
-                missingIngredients.push({
-                    foodName: food ? food.name : req.foodId,
-                    needed: neededQuantity,
-                    have: totalAvailable,
-                    deficit: 0,
-                    needsPrep: true
-                });
+                status = 'warning';
             }
+
+            allIngredients.push({
+                foodId: req.foodId,
+                foodName: food ? food.name : req.foodId,
+                needed: neededQuantity,
+                have: totalAvailable,
+                deficit: Math.max(0, neededQuantity - totalAvailable),
+                status: status,
+                needsPrep: status === 'warning'
+            });
         }
 
         return {
             ...meal,
             recipeName: recipe.name,
             status: mealStatus,
-            missing: missingIngredients
+            ingredients: allIngredients
         };
     });
 }
@@ -187,6 +187,15 @@ function renderView(viewName) {
 
     document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
     document.querySelector(`[data-view="${viewName}"]`)?.classList.add('active');
+
+    const calNav = document.getElementById('calendar-nav');
+    if (calNav) {
+        if (viewName === 'calendar') {
+            calNav.classList.remove('hidden');
+        } else {
+            calNav.classList.add('hidden');
+        }
+    }
 
     if(viewName === 'calendar') {
         const tpl = document.getElementById('tpl-calendar').content.cloneNode(true);
@@ -648,6 +657,7 @@ function openEditFoodModal(foodId) {
     document.querySelector('#food-modal h2').textContent = 'Edit Food Pipeline';
     document.getElementById('food-name').value = food.name;
     document.getElementById('food-category').value = food.category || '';
+    document.getElementById('food-portion-size').value = food.portionSize || '';
     document.getElementById('stage-builder-list').innerHTML = '';
     
     food.stages.forEach(stage => addStageRow(stage));
@@ -693,6 +703,7 @@ function addStageRow(stage = null) {
 function saveFood() {
     const name = document.getElementById('food-name').value.trim();
     const category = document.getElementById('food-category').value.trim() || 'Uncategorized';
+    const portionSize = parseFloat(document.getElementById('food-portion-size').value) || 0;
     if(!name) return alert('Food name is required');
     
     const stages = [];
@@ -730,6 +741,7 @@ function saveFood() {
         if (foodIndex > -1) {
             STATE.foods[foodIndex].name = name;
             STATE.foods[foodIndex].category = category;
+            STATE.foods[foodIndex].portionSize = portionSize;
             STATE.foods[foodIndex].stages = stages;
             
             const inv = STATE.inventory.find(i => i.foodId === editingFoodId);
@@ -746,6 +758,7 @@ function saveFood() {
             id: 'f_' + Date.now(),
             name,
             category,
+            portionSize,
             stages
         };
         STATE.foods.push(newFood);
@@ -790,21 +803,46 @@ function renderInventory() {
             food.stages.forEach(stage => {
                 const qty = invItem.stageQuantities[stage.id] || 0;
                 totalQty += qty;
+                
+                let portionInfoHtml = '';
+                if (food.portionSize > 0) {
+                    const portions = parseFloat((qty / food.portionSize).toFixed(2));
+                    portionInfoHtml = `
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="number" 
+                                   class="inv-portion-input" 
+                                   data-food-id="${food.id}" 
+                                   data-stage-id="${stage.id}" 
+                                   data-portion-size="${food.portionSize}"
+                                   value="${portions}" 
+                                   min="0" 
+                                   step="any"
+                                   placeholder="Portions"
+                                   style="width: 80px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--color-accent); font-size: 13px; font-weight: 600; text-align: center;">
+                            <span style="font-size: 11px; color: var(--text-secondary);">portions</span>
+                        </div>
+                    `;
+                }
+
                 stagesHtml += `
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
-                        <div>
+                        <div style="flex: 1;">
                             <span style="font-weight: 500; font-size: 14px;">${stage.name}</span>
                             <span style="font-size: 12px; color: var(--text-secondary); margin-left: 8px;">(${stage.daysBefore} days out)</span>
                         </div>
-                        <div>
-                            <input type="number" 
-                                   class="inv-qty-input" 
-                                   data-food-id="${food.id}" 
-                                   data-stage-id="${stage.id}" 
-                                   value="${qty}" 
-                                   min="0" 
-                                   step="any"
-                                   style="width: 80px; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-inner); color: var(--text-primary); font-family: inherit;">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            ${portionInfoHtml}
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <input type="number" 
+                                       class="inv-qty-input" 
+                                       data-food-id="${food.id}" 
+                                       data-stage-id="${stage.id}" 
+                                       value="${qty}" 
+                                       min="0" 
+                                       step="any"
+                                       style="width: 80px; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-family: inherit;">
+                                <span style="font-size: 12px; color: var(--text-secondary);">g</span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -848,22 +886,49 @@ function renderInventory() {
             const foodId = e.target.dataset.foodId;
             const stageId = e.target.dataset.stageId;
             const newQty = parseFloat(e.target.value) || 0;
-            
-            const inv = STATE.inventory.find(i => i.foodId === foodId);
-            if (inv) {
-                inv.stageQuantities[stageId] = newQty;
-                runSimulation();
-                saveState();
-                
-                // Live update the Total sum in the accordion header
-                let newTotal = 0;
-                Object.values(inv.stageQuantities).forEach(q => newTotal += q);
-                const itemNode = input.closest('.inventory-accordion-item');
-                const totalSpan = itemNode.querySelector('.inv-total-sum');
-                if(totalSpan) totalSpan.textContent = newTotal;
-            }
+            updateInventoryQuantity(foodId, stageId, newQty);
         });
     });
+
+    list.querySelectorAll('.inv-portion-input').forEach(input => {
+        input.addEventListener('change', (e) => {
+            const foodId = e.target.dataset.foodId;
+            const stageId = e.target.dataset.stageId;
+            const portionSize = parseFloat(e.target.dataset.portionSize);
+            const numPortions = parseFloat(e.target.value) || 0;
+            const newQty = numPortions * portionSize;
+            updateInventoryQuantity(foodId, stageId, newQty);
+        });
+    });
+}
+
+function updateInventoryQuantity(foodId, stageId, newQty) {
+    const inv = STATE.inventory.find(i => i.foodId === foodId);
+    if(inv) {
+        inv.stageQuantities[stageId] = newQty;
+        runSimulation();
+        saveState();
+        
+        // Live update the Total sum in the accordion header
+        let newTotal = 0;
+        Object.values(inv.stageQuantities).forEach(q => newTotal += q);
+        const itemNode = document.querySelector(`.inventory-accordion-item[data-food-id="${foodId}"]`);
+        if(itemNode) {
+            const totalSpan = itemNode.querySelector('.inv-total-sum');
+            if(totalSpan) totalSpan.textContent = newTotal % 1 === 0 ? newTotal : newTotal.toFixed(1);
+
+            // Sync other inputs for this stage
+            const stageInputs = itemNode.querySelectorAll(`[data-stage-id="${stageId}"]`);
+            stageInputs.forEach(input => {
+                if(input.classList.contains('inv-qty-input')) {
+                    input.value = newQty;
+                } else if(input.classList.contains('inv-portion-input')) {
+                    const portionSize = parseFloat(input.dataset.portionSize);
+                    input.value = parseFloat((newQty / portionSize).toFixed(2));
+                }
+            });
+        }
+    }
 }
 
 
@@ -900,24 +965,23 @@ function openDebugPanel(mealId) {
         </div>
     `;
 
-    if(meal.status === 'Green') {
-        html += `<div style="color: var(--color-green); font-weight: 500; font-size: 15px;"><i class="ph ph-check-circle" style="font-size: 20px; vertical-align: bottom;"></i> All ingredients are fully prepped!</div>`;
-    } else {
-        html += `<div class="ingredient-list">`;
-        meal.missing.forEach(req => {
-            html += `
-                <div class="ingredient-req">
-                    <h4>${req.foodName}</h4>
-                    <div class="req-stats">
-                        <div class="req-stat ${req.deficit > 0 ? 'error' : 'warning'}">Have: ${req.have}</div>
-                        <div class="req-stat">Need: ${req.needed}</div>
-                        ${req.deficit > 0 ? `<div class="req-stat">Deficit: -${req.deficit}</div>` : `<div class="req-stat warning">Needs Prep</div>`}
-                    </div>
+    html += `<div class="ingredient-list">`;
+    meal.ingredients.forEach(req => {
+        html += `
+            <div class="ingredient-req">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <h4 style="margin: 0;">${req.foodName}</h4>
+                    <span class="status-badge status-${req.status}" style="font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.05);">${req.status === 'success' ? 'Ready' : (req.status === 'error' ? 'Deficit' : 'Prep Needed')}</span>
                 </div>
-            `;
-        });
-        html += `</div>`;
-    }
+                <div class="req-stats">
+                    <div class="req-stat ${req.status}" onclick="app_jumpToInventory('${req.foodId}')" style="cursor: pointer; text-decoration: underline;" title="Click to view in Inventory">Have: ${req.have}</div>
+                    <div class="req-stat">Need: ${req.needed}</div>
+                    ${req.deficit > 0 ? `<div class="req-stat error">Deficit: -${req.deficit}</div>` : ''}
+                </div>
+            </div>
+        `;
+    });
+    html += `</div>`;
 
     content.innerHTML = html;
     panel.classList.add('open');
@@ -940,5 +1004,24 @@ window.app_deleteMeal = (mealId) => {
     }
 };
 
+window.app_jumpToInventory = (foodId) => {
+    renderView('inventory');
+    const item = document.querySelector(`.inventory-accordion-item[data-food-id="${foodId}"]`);
+    if (item) {
+        item.classList.add('open');
+        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Brief highlight effect
+        item.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+        setTimeout(() => {
+            item.style.backgroundColor = '';
+        }, 1000);
+    }
+    closeDebugPanel();
+};
+
 // App Entry
 window.addEventListener('DOMContentLoaded', initApp);
+window.renderCalendar = renderCalendar;
+window.renderView = renderView;
+window.runSimulation = runSimulation;

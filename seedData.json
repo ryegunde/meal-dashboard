@@ -4,6 +4,7 @@
       "id": "f_chicken_breast",
       "name": "Chicken Breast",
       "category": "Proteins",
+      "portionSize": 150,
       "stages": [
         { "id": "s_cb_fridge", "name": "Fridge (3 day timer)", "daysBefore": 2, "activeTimeMin": 0, "passiveTimeMin": 0 },
         { "id": "s_cb_season", "name": "Seasoned+Seal", "daysBefore": 1, "activeTimeMin": 15, "passiveTimeMin": 0 },
@@ -14,6 +15,7 @@
       "id": "f_chicken_thighs",
       "name": "Chicken Thighs",
       "category": "Proteins",
+      "portionSize": 150,
       "stages": [
         { "id": "s_ct_fridge", "name": "Fridge (3 day timer)", "daysBefore": 2, "activeTimeMin": 0, "passiveTimeMin": 0 },
         { "id": "s_ct_season", "name": "Seasoned+Seal", "daysBefore": 1, "activeTimeMin": 30, "passiveTimeMin": 0 },
@@ -24,6 +26,7 @@
       "id": "f_tilapia",
       "name": "Tilapia",
       "category": "Proteins",
+      "portionSize": 150,
       "stages": [
         { "id": "s_t_fridge", "name": "Fridge (3 day timer)", "daysBefore": 2, "activeTimeMin": 0, "passiveTimeMin": 0 },
         { "id": "s_t_season", "name": "Seasoned+Seal", "daysBefore": 1, "activeTimeMin": 15, "passiveTimeMin": 0 },

@@ -591,30 +591,64 @@ function renderFoods() {
     const list = document.getElementById('food-list');
     if(!list) return;
     
-    let html = '';
+    // Group foods by category
+    const categories = {};
     STATE.foods.forEach(food => {
-        let stagesHTML = food.stages.map(s => {
-            let activeHtml = s.activeTimeMin ? `<span class="time-active" title="Active Time"><i class="ph ph-hand-fist"></i> ${s.activeTimeMin}m</span>` : '';
-            let passiveHtml = s.passiveTimeMin ? `<span class="time-passive" title="Passive Time"><i class="ph ph-hourglass-low"></i> ${s.passiveTimeMin}m</span>` : '';
-            return `<span class="food-stage-pill">${s.name} (${s.daysBefore}d)${activeHtml}${passiveHtml}</span>`;
-        }).join('<span style="color:var(--text-secondary); font-size:10px; margin: 0 4px;">➔</span> ');
-        
-        html += `
-            <div class="recipe-item" data-food-id="${food.id}">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
-                    <h3 style="margin: 0;">${food.name}</h3>
-                    <div style="display: flex; gap: 4px;">
-                        <button class="icon-btn btn-edit-food"><i class="ph ph-pencil-simple"></i></button>
-                        <button class="icon-btn btn-delete-food" style="color: var(--color-red);"><i class="ph ph-trash"></i></button>
+        const cat = food.category || 'Uncategorized';
+        if(!categories[cat]) categories[cat] = [];
+        categories[cat].push(food);
+    });
+
+    let html = '';
+    const sortedCats = Object.keys(categories).sort();
+    
+    sortedCats.forEach(cat => {
+        let foodsHTML = '';
+        categories[cat].forEach(food => {
+            let stagesHTML = food.stages.map(s => {
+                let activeHtml = s.activeTimeMin ? `<span class="time-active" title="Active Time"><i class="ph ph-hand-fist"></i> ${s.activeTimeMin}m</span>` : '';
+                let passiveHtml = s.passiveTimeMin ? `<span class="time-passive" title="Passive Time"><i class="ph ph-hourglass-low"></i> ${s.passiveTimeMin}m</span>` : '';
+                return `<span class="food-stage-pill">${s.name} (${s.daysBefore}d)${activeHtml}${passiveHtml}</span>`;
+            }).join('<span style="color:var(--text-secondary); font-size:10px; margin: 0 4px;">➔</span> ');
+            
+            foodsHTML += `
+                <div class="recipe-item" data-food-id="${food.id}" style="border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; margin-bottom: 12px; background: rgba(255,255,255,0.02);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                        <h3 style="margin: 0; font-size: 16px;">${food.name}</h3>
+                        <div style="display: flex; gap: 4px;">
+                            <button class="icon-btn btn-edit-food"><i class="ph ph-pencil-simple"></i></button>
+                            <button class="icon-btn btn-delete-food" style="color: var(--color-red);"><i class="ph ph-trash"></i></button>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; line-height: 1.8;">
+                        ${stagesHTML}
                     </div>
                 </div>
-                <div style="margin-top: 12px; line-height: 1.8;">
-                    ${stagesHTML}
+            `;
+        });
+
+        html += `
+            <div class="inventory-accordion-item food-category-accordion" data-category="${cat}">
+                <div class="inventory-accordion-header">
+                    <span>${cat}</span>
+                    <i class="ph ph-caret-down accordion-icon"></i>
+                </div>
+                <div class="inventory-accordion-content" style="padding: 16px;">
+                    ${foodsHTML}
                 </div>
             </div>
         `;
     });
+    
     list.innerHTML = html;
+
+    // Accordion toggle logic for food categories
+    list.querySelectorAll('.inventory-accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const item = header.closest('.inventory-accordion-item');
+            item.classList.toggle('open');
+        });
+    });
 }
 
 let editingFoodId = null;

@@ -9,7 +9,7 @@ module.exports = defineConfig({
   timeout: 8000, // Increased slightly to 8s to allow for reloads, but individual actions will be fast
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:8080',
+    baseURL: 'http://localhost:8081',
     trace: 'on-first-retry',
     actionTimeout: 3000,
   },

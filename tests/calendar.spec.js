@@ -2,9 +2,11 @@ const { test, expect } = require('@playwright/test');
 
 test.describe('Calendar & Navigation', () => {
   test.beforeEach(async ({ page }) => {
+    await page.clock.setFixedTime(new Date('2026-05-11T08:00:00Z'));
     await page.goto('/');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
+    await page.waitForSelector('body[data-app-ready="true"]');
   });
 
   test('should display current week by default', async ({ page }) => {

@@ -2,19 +2,6 @@
 
 The **Meal Pipeline Planner** uses the [Playwright](https://playwright.dev/) framework for automated end-to-end (E2E) testing. This ensures that the application's core logic and UI components work as expected across different browsers and scenarios.
 
-## Testing Strategy
-
-The test suite is located in the `[tests/](file:///c:/src/Antigravity/meal-dashboard/tests/)` directory and consists of several focused specification files:
-
--   **`builders.spec.js`**: Verifies the functionality of the recipe and food stage builders.
--   **`calendar.spec.js`**: Tests calendar navigation and meal scheduling interactions.
--   **`engine.spec.js`**: Validates the core simulation engine's logic (Green/Blue/Red statuses).
--   **`scheduling.spec.js`**: Ensures that scheduled meals are correctly saved and rendered.
--   **`cleanup.spec.js`**: Verifies the automatic midnight inventory subtraction for past meals.
--   **`details.spec.js`**: Tests the enhanced meal details rendering and inventory navigation interactivity.
--   **`portions.spec.js`**: Validates the inventory portioning system and automatic unit conversion logic.
--   **`ui_layout.spec.js`**: Checks for UI regressions, specifically ensuring all modals are responsive and have no horizontal overflow.
-
 ## Running Tests Locally
 
 To execute the test suite on your machine:
@@ -30,6 +17,19 @@ To execute the test suite on your machine:
     npm run test:ui
     ```
     This opens the Playwright UI, allowing you to see the tests executing in real-time and explore failures.
+
+## Testing Strategy
+
+The test suite is located in the `[tests/](file:///c:/src/Antigravity/meal-dashboard/tests/)` directory and consists of several focused specification files:
+
+-   **`builders.spec.js`**: Verifies the functionality of the recipe and food stage builders.
+-   **`calendar.spec.js`**: Tests calendar navigation and meal scheduling interactions.
+-   **`engine.spec.js`**: Validates the core simulation engine's logic (Green/Blue/Red statuses).
+-   **`scheduling.spec.js`**: Ensures that scheduled meals are correctly saved and rendered.
+-   **`cleanup.spec.js`**: Verifies the automatic midnight inventory subtraction for past meals.
+-   **`details.spec.js`**: Tests the enhanced meal details rendering and inventory navigation interactivity.
+-   **`portions.spec.js`**: Validates the inventory portioning system and automatic unit conversion logic.
+-   **`ui_layout.spec.js`**: Checks for UI regressions, specifically ensuring all modals are responsive and have no horizontal overflow.
 
 ## CI/CD Integration
 

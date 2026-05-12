@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Food Builder Categories', () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto('http://localhost:8080');
+        await page.goto('/');
         await page.waitForSelector('body[data-app-ready="true"]');
         await page.click('[data-view="foods"]');
     });
@@ -49,10 +49,10 @@ test.describe('Food Builder Categories', () => {
         await page.fill('#food-category', 'Fruit');
         await page.fill('#food-portion-size', '150');
         
-        await page.click('#btn-add-stage');
         await page.fill('.stage-name', 'Wash');
+        await page.fill('.stage-days', '0');
         
-        const saveBtn = page.locator('#save-food');
+        const saveBtn = page.locator('#btn-save-food');
         await expect(saveBtn).toBeVisible();
         await saveBtn.click();
         

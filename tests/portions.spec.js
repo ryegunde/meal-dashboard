@@ -22,7 +22,7 @@ test.describe('Inventory Portioning', () => {
         await page.addInitScript((data) => {
             localStorage.setItem('PREPFLOW_DATA_V1', JSON.stringify(data));
         }, testData);
-        await page.goto('http://localhost:8080');
+        await page.goto('/');
         await page.waitForSelector('body[data-app-ready="true"]');
         
         // Navigate to Inventory

@@ -24,6 +24,9 @@ test.describe('Food & Recipe Builders', () => {
     await stageRow.locator('.stage-days').fill('5');
     await page.click('#btn-save-food');
     
+    // Open Proteins accordion to see the new food
+    await page.click('.inventory-accordion-header:has-text("Proteins")');
+    
     const foodCard = page.locator('.recipe-item', { hasText: 'Test Protein' }).first();
     await expect(foodCard).toBeVisible();
     await expect(foodCard.locator('.food-stage-pill')).toContainText('Frozen (5d)');

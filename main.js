@@ -7,6 +7,7 @@ const STATE = {
     recipes: [],
     scheduledMeals: [],
     computedMeals: [],
+    dashboardAlerts: [],
     currentWeekStart: null // Date object for Sunday of the active week
 };
 window.STATE = STATE;
@@ -177,7 +178,99 @@ function runSimulation() {
             ingredients: allIngredients
         };
     });
+
+    // Compute dashboard alerts after simulation
+    computeDashboardAlerts();
 }
+
+// 2.5. Dashboard Alerts Computation
+// Produces STATE.dashboardAlerts — sorted by urgency date.
+function computeDashboardAlerts() {
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    // Only non-consumed future (and today's) meals, sorted by date ascending
+    const upcomingMeals = STATE.computedMeals
+        .filter(m => !m.consumed && m.date >= todayStr)
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+    // Accumulate: one entry per foodId (most urgent / worst-case)
+    const alertMap = {}; // foodId -> alert object
+
+    upcomingMeals.forEach(meal => {
+        const mealDate = new Date(meal.date + 'T00:00:00'); // Local midnight
+
+        meal.ingredients.forEach(req => {
+            if (req.status === 'success') return; // All good
+
+            const food = STATE.foods.find(f => f.id === req.foodId);
+            if (!food) return;
+
+            let alertType, nextStageName, actionDate;
+
+            if (req.status === 'error') {
+                // Red: ingredient missing entirely
+                alertType = 'red';
+                // Action needed immediately (or as soon as possible)
+                // Use the earliest required prep stage deadline for action date
+                const earliestStage = food.stages[0]; // highest daysBefore (sorted desc in data)
+                const actionD = new Date(mealDate);
+                actionD.setDate(mealDate.getDate() - (earliestStage ? earliestStage.daysBefore : 0));
+                actionDate = actionD.toISOString().split('T')[0];
+                nextStageName = earliestStage ? earliestStage.name : 'Acquire';
+            } else {
+                // Blue: needs prep — find which stage to action next
+                alertType = 'blue';
+                const inv = STATE.inventory.find(i => i.foodId === req.foodId);
+                // Stages are stored sorted desc by daysBefore (start -> finish)
+                // Walk stages to find the first one that lacks sufficient quantity
+                let targetStage = null;
+                for (const stage of food.stages) {
+                    const qty = inv ? (inv.stageQuantities[stage.id] || 0) : 0;
+                    if (qty < req.needed) {
+                        targetStage = stage;
+                        break; // first deficient stage = what needs to be initiated
+                    }
+                }
+                if (!targetStage) targetStage = food.stages[food.stages.length - 1];
+                nextStageName = targetStage.name;
+                const actionD = new Date(mealDate);
+                actionD.setDate(mealDate.getDate() - targetStage.daysBefore);
+                actionDate = actionD.toISOString().split('T')[0];
+            }
+
+            const existing = alertMap[req.foodId];
+            // Keep the most urgent: red beats blue, earlier actionDate beats later
+            const isMoreUrgent = !existing ||
+                (alertType === 'red' && existing.alertType !== 'red') ||
+                (alertType === existing.alertType && actionDate < existing.actionDate);
+
+            if (isMoreUrgent) {
+                alertMap[req.foodId] = {
+                    foodId: req.foodId,
+                    foodName: req.foodName,
+                    alertType,
+                    mealId:   meal.id,
+                    mealDate: meal.date,
+                    recipeName: meal.recipeName,
+                    mealType: meal.type,
+                    needed: req.needed,
+                    have: req.have,
+                    deficit: req.deficit,
+                    nextStageName,
+                    actionDate
+                };
+            }
+        });
+    });
+
+    // Sort: red before blue on same date, then by actionDate asc
+    STATE.dashboardAlerts = Object.values(alertMap).sort((a, b) => {
+        if (a.actionDate !== b.actionDate) return a.actionDate.localeCompare(b.actionDate);
+        if (a.alertType !== b.alertType) return a.alertType === 'red' ? -1 : 1;
+        return a.foodName.localeCompare(b.foodName);
+    });
+}
+window.computeDashboardAlerts = computeDashboardAlerts;
 
 // 3. UI Rendering
 function renderView(viewName) {
@@ -215,6 +308,10 @@ function renderView(viewName) {
         const tpl = document.getElementById('tpl-inventory').content.cloneNode(true);
         container.appendChild(tpl);
         renderInventory();
+    } else if (viewName === 'dashboard') {
+        const tpl = document.getElementById('tpl-dashboard').content.cloneNode(true);
+        container.appendChild(tpl);
+        renderDashboard();
     } else {
         container.innerHTML = `<div style="color: var(--text-secondary); text-align: center; margin-top: 100px;">
             ${viewName} module is under construction (Phase 2).
@@ -1053,6 +1150,100 @@ window.app_jumpToInventory = (foodId) => {
     }
     closeDebugPanel();
 };
+
+// --- DASHBOARD MODULE ---
+
+function renderDashboard() {
+    const summaryEl = document.getElementById('dashboard-summary');
+    const listEl    = document.getElementById('alert-list');
+    if (!listEl) return;
+
+    const alerts = STATE.dashboardAlerts || [];
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    // Summary strip
+    const redCount  = alerts.filter(a => a.alertType === 'red').length;
+    const blueCount = alerts.filter(a => a.alertType === 'blue').length;
+
+    if (summaryEl) {
+        if (alerts.length === 0) {
+            summaryEl.innerHTML = `
+                <span class="summary-pill summary-pill-green">
+                    <i class="ph ph-check-circle"></i> All meals covered
+                </span>`;
+        } else {
+            let pills = '';
+            if (redCount)  pills += `<span class="summary-pill summary-pill-red"><i class="ph ph-warning-circle"></i> ${redCount} missing</span>`;
+            if (blueCount) pills += `<span class="summary-pill summary-pill-blue"><i class="ph ph-clock-countdown"></i> ${blueCount} need prep</span>`;
+            summaryEl.innerHTML = pills;
+        }
+    }
+
+    // Alert cards or empty state
+    if (alerts.length === 0) {
+        listEl.innerHTML = `
+            <div class="alert-empty-state" id="alert-empty-state">
+                <i class="ph ph-check-fat"></i>
+                <h2>You're all set!</h2>
+                <p>No missing ingredients or pending prep steps for your upcoming meals.</p>
+            </div>`;
+        return;
+    }
+
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    function fmtDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr + 'T00:00:00');
+        const diff = Math.round((d - new Date(todayStr + 'T00:00:00')) / 86400000);
+        let label = '';
+        if (diff === 0) label = ' (Today)';
+        else if (diff === 1) label = ' (Tomorrow)';
+        else if (diff > 0) label = ` (in ${diff}d)`;
+        else label = ` (${Math.abs(diff)}d ago)`;
+        return `${months[d.getMonth()]} ${d.getDate()}${label}`;
+    }
+
+    let html = '';
+    alerts.forEach(alert => {
+        const isRed  = alert.alertType === 'red';
+        const isDue  = alert.actionDate <= todayStr;
+        const actionLabel = isRed
+            ? `<strong>Acquire ${alert.deficit.toFixed ? alert.deficit.toFixed(0) : alert.deficit} more</strong> (have ${alert.have}, need ${alert.needed})`
+            : `<strong>Start: ${alert.nextStageName}</strong>`;
+        const urgencyClass = isDue ? 'alert-urgency-chip alert-urgency-now' : 'alert-urgency-chip';
+
+        html += `
+            <div class="alert-card alert-${alert.alertType}" data-food-id="${alert.foodId}" data-alert-type="${alert.alertType}">
+                <div class="alert-card-left">
+                    <div class="alert-card-header">
+                        <span class="alert-type-badge alert-badge-${alert.alertType}">
+                            <i class="ph ${isRed ? 'ph-warning-circle' : 'ph-clock-countdown'}"></i>
+                            ${isRed ? 'Missing' : 'Prep Needed'}
+                        </span>
+                        <span class="${urgencyClass}">
+                            Act by: ${fmtDate(alert.actionDate)}
+                        </span>
+                    </div>
+                    <div class="alert-food-name">${alert.foodName}</div>
+                    <div class="alert-action-text">${actionLabel}</div>
+                    <div class="alert-meal-ref">
+                        <i class="ph ph-fork-knife"></i>
+                        ${alert.recipeName} &bull; ${alert.mealType.charAt(0).toUpperCase() + alert.mealType.slice(1)} on ${fmtDate(alert.mealDate)}
+                    </div>
+                </div>
+                <div class="alert-card-right">
+                    <button class="btn btn-ghost alert-jump-btn"
+                        onclick="app_jumpToInventory('${alert.foodId}')">
+                        <i class="ph ph-arrow-square-out"></i> Inventory
+                    </button>
+                </div>
+            </div>`;
+    });
+
+    listEl.innerHTML = html;
+}
+window.renderDashboard = renderDashboard;
 
 // App Entry
 window.addEventListener('DOMContentLoaded', initApp);

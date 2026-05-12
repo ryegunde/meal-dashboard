@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Modal UI Layout', () => {
     test.beforeEach(async ({ page }) => {
         await page.clock.setFixedTime(new Date('2026-03-23T08:00:00Z'));
-        await page.goto('http://localhost:8080');
+        await page.goto('/');
         await page.waitForSelector('body[data-app-ready="true"]');
     });
 

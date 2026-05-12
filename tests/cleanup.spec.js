@@ -35,7 +35,7 @@ test.describe('Midnight Inventory Cleanup', () => {
 
         // Start on a fixed date: 2026-03-31
         await page.clock.setFixedTime(new Date('2026-03-31T08:00:00Z'));
-        await page.goto('http://localhost:8080');
+        await page.goto('/');
 
         // Wait for app to be ready
         await page.waitForSelector('body[data-app-ready="true"]');
@@ -99,7 +99,7 @@ test.describe('Midnight Inventory Cleanup', () => {
         }, testData);
 
         await page.clock.setFixedTime(new Date('2026-04-02T08:00:00Z'));
-        await page.goto('http://localhost:8080');
+        await page.goto('/');
 
         await page.waitForSelector('body[data-app-ready="true"]');
 

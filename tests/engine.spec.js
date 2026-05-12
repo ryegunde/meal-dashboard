@@ -55,6 +55,8 @@ test.describe('Inventory & Logic', () => {
     await waitForApp(page);
     
     await page.click('li[data-view="foods"]');
+    // Open Uncategorized accordion (default for new foods with no category)
+    await page.click('.inventory-accordion-header:has-text("Uncategorized")');
     await expect(page.locator('.recipe-item:has-text("PersistFood")')).toBeVisible();
   });
 });

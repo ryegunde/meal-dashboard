@@ -185,6 +185,23 @@
         </div>
     </template>
 
+    <template id="tpl-dashboard">
+        <div class="dashboard-view">
+            <div class="view-header-actions" style="margin-bottom: 20px;">
+                <div>
+                    <h2>Dashboard</h2>
+                    <p style="color: var(--text-secondary); margin-top: 4px; font-size: 14px;">Pressing actions for your upcoming meals — sorted by urgency.</p>
+                </div>
+                <div class="dashboard-summary-strip" id="dashboard-summary">
+                    <!-- Pills injected by JS -->
+                </div>
+            </div>
+            <div class="alert-list" id="alert-list">
+                <!-- Alert cards injected by JS -->
+            </div>
+        </div>
+    </template>
+
     <!-- Meal Selection Modal (for Calendar) -->
     <div class="modal-overlay hidden" id="meal-picker-modal">
         <div class="modal">

@@ -34,7 +34,7 @@ test.describe('Meal Details and Navigation', () => {
             localStorage.setItem('PREPFLOW_DATA_V1', JSON.stringify(data));
         }, testData);
         await page.clock.setFixedTime(new Date('2026-04-01T08:00:00Z'));
-        await page.goto('http://localhost:8080');
+        await page.goto('/');
         await page.waitForSelector('body[data-app-ready="true"]');
     });
 

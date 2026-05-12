@@ -8,10 +8,11 @@ test.describe('Food Builder Categories', () => {
     });
 
     test('should group foods by category and show accordions', async ({ page }) => {
-        // Based on seedData.json, we expect Categories like "Proteins", "Veggies", "Grains", "Pantry"
+        // Based on seedData.json, we expect Categories like "Dairy", "Proteins", "Veggies", "Grains", "Pantry"
         const accordions = page.locator('.food-category-accordion');
-        await expect(accordions).toHaveCount(4); 
+        await expect(accordions).toHaveCount(5); 
         
+        await expect(accordions.filter({ hasText: 'Dairy' })).toBeVisible();
         await expect(accordions.filter({ hasText: 'Proteins' })).toBeVisible();
         await expect(accordions.filter({ hasText: 'Veggies' })).toBeVisible();
         await expect(accordions.filter({ hasText: 'Grains' })).toBeVisible();

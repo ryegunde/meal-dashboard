@@ -158,6 +158,30 @@
       "stages": [
         { "id": "s_p_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
       ]
+    },
+    {
+      "id": "f_milk_2",
+      "name": "2% Milk",
+      "category": "Dairy",
+      "stages": [
+        { "id": "s_milk_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_cheddar",
+      "name": "Cheddar Cheese",
+      "category": "Dairy",
+      "stages": [
+        { "id": "s_cheddar_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_parmesan",
+      "name": "Parmesan Cheese",
+      "category": "Dairy",
+      "stages": [
+        { "id": "s_parmesan_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
     }
   ],
   "inventory": [
@@ -177,7 +201,10 @@
     { "foodId": "f_onion", "stageQuantities": { "s_on_raw": 0, "s_on_cut": 0 } },
     { "foodId": "f_pepper", "stageQuantities": { "s_pe_raw": 0, "s_pe_cut": 0 } },
     { "foodId": "f_jalapeno", "stageQuantities": { "s_ja_raw": 0, "s_ja_cut": 0 } },
-    { "foodId": "f_pantry_generic", "stageQuantities": { "s_p_ready": 0 } }
+    { "foodId": "f_pantry_generic", "stageQuantities": { "s_p_ready": 0 } },
+    { "foodId": "f_milk_2", "stageQuantities": { "s_milk_ready": 0 } },
+    { "foodId": "f_cheddar", "stageQuantities": { "s_cheddar_ready": 0 } },
+    { "foodId": "f_parmesan", "stageQuantities": { "s_parmesan_ready": 0 } }
   ],
   "recipes": [
     {
@@ -235,9 +262,9 @@
         { "foodId": "f_chicken_breast", "quantityPerPortion": 150 },
         { "foodId": "f_cauliflower", "quantityPerPortion": 60 },
         { "foodId": "f_potato", "quantityPerPortion": 60 },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 100, "note": "2% Milk" },
+        { "foodId": "f_milk_2", "quantityPerPortion": 100 },
         { "foodId": "f_pantry_generic", "quantityPerPortion": 5, "note": "Flour" },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 12, "note": "Cheese" },
+        { "foodId": "f_cheddar", "quantityPerPortion": 12 },
         { "foodId": "f_jalapeno", "quantityPerPortion": 0.8 }
       ]
     },

@@ -22,7 +22,8 @@ test.describe('Calendar & Navigation', () => {
   test('should highlight today', async ({ page }) => {
     const todayColumn = page.locator('.day-column.is-today');
     await expect(todayColumn).toBeVisible();
-    await expect(todayColumn.locator('.day-date')).toHaveText(new Date().getDate().toString());
+    // Use the fixed date we set in beforeEach (May 11)
+    await expect(todayColumn.locator('.day-date')).toHaveText('11');
   });
 
   test('should provide 3 meal slots per day', async ({ page }) => {

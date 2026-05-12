@@ -12,6 +12,7 @@ module.exports = defineConfig({
     baseURL: 'http://localhost:8081',
     trace: 'on-first-retry',
     actionTimeout: 3000,
+    timezoneId: 'America/New_York',
   },
   projects: [
     {

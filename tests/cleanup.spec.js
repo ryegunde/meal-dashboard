@@ -49,8 +49,8 @@ test.describe('Midnight Inventory Cleanup', () => {
         expect(state.inventory).toBe(100);
         expect(state.meals.every(m => !m.consumed)).toBe(true);
 
-        // Advance time to 2026-04-01 (Next day)
-        await page.clock.setFixedTime(new Date('2026-04-01T01:00:00Z'));
+        // Advance time to 2026-04-01 (Next day, 4 AM in NYC)
+        await page.clock.setFixedTime(new Date('2026-04-01T08:00:00Z'));
         
         // Either reload or wait for setInterval (setInterval is 1 min, but we can call it manually)
         await page.evaluate(() => processMidnightCleanup());

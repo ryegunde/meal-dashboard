@@ -14,6 +14,18 @@ window.STATE = STATE;
 
 const STORAGE_KEY = 'PREPFLOW_DATA_V1';
 
+// --- TIMEZONE HELPERS (Enforce EST/EDT) ---
+function getTodayString() {
+    // Returns YYYY-MM-DD in America/New_York timezone
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date());
+}
+
+function getNewYorkDate(date = new Date()) {
+    // Returns a Date object adjusted to America/New_York
+    const str = date.toLocaleString('en-US', { timeZone: 'America/New_York' });
+    return new Date(str);
+}
+
 // 1. Core Logic & Data loading
 async function initApp() {
     try {
@@ -35,8 +47,8 @@ async function initApp() {
         STATE.recipes = data.recipes || [];
         STATE.scheduledMeals = data.scheduledMeals || [];
         
-        // 2. Initialize Calendar Date (Start of current week)
-        const now = new Date();
+        // 2. Initialize Calendar Date (Start of current week in NY time)
+        const now = getNewYorkDate();
         const day = now.getDay(); // 0 (Sun) to 6 (Sat)
         const sunday = new Date(now);
         sunday.setDate(now.getDate() - day);
@@ -69,8 +81,7 @@ function saveState() {
 // 1.5. Midnight Cleanup Logic
 function processMidnightCleanup() {
     try {
-        const now = new Date();
-        const todayStr = now.toISOString().split('T')[0];
+        const todayStr = getTodayString();
         let changed = false;
 
         console.log(`Checking midnight cleanup for: ${todayStr}`);
@@ -186,7 +197,7 @@ function runSimulation() {
 // 2.5. Dashboard Alerts Computation
 // Produces STATE.dashboardAlerts — sorted by urgency date.
 function computeDashboardAlerts() {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getTodayString();
 
     // Only non-consumed future (and today's) meals, sorted by date ascending
     const upcomingMeals = STATE.computedMeals
@@ -424,6 +435,19 @@ function setupCalendarInteractions() {
         saveScheduledMeal(recipeId);
         document.getElementById('meal-picker-modal').classList.add('hidden');
     });
+
+    // Multi-day modal listeners
+    document.getElementById('close-multi-day-modal').addEventListener('click', () => {
+        document.getElementById('multi-day-modal').classList.add('hidden');
+    });
+    document.getElementById('btn-multi-day-no').addEventListener('click', () => {
+        document.getElementById('multi-day-modal').classList.add('hidden');
+    });
+    document.getElementById('btn-multi-day-yes').addEventListener('click', () => {
+        const data = document.getElementById('multi-day-modal').dataset;
+        applyMultiDayAssignment(data.recipeId, data.startDate, data.type, parseInt(data.count));
+        document.getElementById('multi-day-modal').classList.add('hidden');
+    });
 }
 
 function openMealPicker(mealId = null) {
@@ -481,10 +505,16 @@ function renderPickerList(recipes) {
 function saveScheduledMeal(recipeId) {
     if (!activePickerTarget) return;
 
+    let savedMealId = null;
+    const recipe = STATE.recipes.find(r => r.id === recipeId);
+
     if (activePickerTarget.mealId) {
         // Update existing
         const meal = STATE.scheduledMeals.find(m => m.id === activePickerTarget.mealId);
-        if (meal) meal.recipeId = recipeId;
+        if (meal) {
+            meal.recipeId = recipeId;
+            savedMealId = meal.id;
+        }
     } else {
         // Create new
         const newMeal = {
@@ -494,8 +524,58 @@ function saveScheduledMeal(recipeId) {
             recipeId: recipeId
         };
         STATE.scheduledMeals.push(newMeal);
+        savedMealId = newMeal.id;
+
+        // Convenience Feature: Multi-day assignment
+        if (recipe && recipe.portions > 1) {
+            promptMultiDayAssignment(recipe, activePickerTarget.date, activePickerTarget.type);
+        }
     }
 
+    runSimulation();
+    renderCalendar();
+    saveState();
+}
+
+function promptMultiDayAssignment(recipe, startDate, type) {
+    const modal = document.getElementById('multi-day-modal');
+    const text = document.getElementById('multi-day-text');
+    const countSpan = document.getElementById('multi-day-count');
+    
+    text.textContent = `You have ${recipe.portions} portions of ${recipe.name}. Would you like to set this as your ${type} for the next ${recipe.portions} days?`;
+    countSpan.textContent = recipe.portions;
+    
+    // Store data for the 'Yes' button
+    modal.dataset.recipeId = recipe.id;
+    modal.dataset.startDate = startDate;
+    modal.dataset.type = type;
+    modal.dataset.count = recipe.portions;
+    
+    modal.classList.remove('hidden');
+}
+
+function applyMultiDayAssignment(recipeId, startDate, type, count) {
+    // Fill the next (count - 1) days
+    const start = new Date(startDate + 'T00:00:00');
+    
+    for (let i = 1; i < count; i++) {
+        const nextDay = new Date(start);
+        nextDay.setDate(start.getDate() + i);
+        // Ensure next day string is also in New York time
+        const nextDayStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(nextDay);
+        
+        // Only add if no meal exists in that slot
+        const exists = STATE.scheduledMeals.find(m => m.date === nextDayStr && m.type === type);
+        if (!exists) {
+            STATE.scheduledMeals.push({
+                id: 'm_' + Date.now() + '_' + i,
+                date: nextDayStr,
+                type: type,
+                recipeId: recipeId
+            });
+        }
+    }
+    
     runSimulation();
     renderCalendar();
     saveState();
@@ -1159,7 +1239,7 @@ function renderDashboard() {
     if (!listEl) return;
 
     const alerts = STATE.dashboardAlerts || [];
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getTodayString();
 
     // Summary strip
     const redCount  = alerts.filter(a => a.alertType === 'red').length;

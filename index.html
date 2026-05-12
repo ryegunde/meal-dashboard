@@ -224,6 +224,23 @@
         </div>
     </div>
 
+    <!-- Multi-day Assignment Prompt -->
+    <div class="modal-overlay hidden" id="multi-day-modal">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Multi-day Assignment</h2>
+                <button class="icon-btn" id="close-multi-day-modal"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <p id="multi-day-text">You have 5 portions. Would you like to set this as your lunch for the next 5 days?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="btn-multi-day-no">No, just today</button>
+                <button class="btn btn-primary" id="btn-multi-day-yes">Yes, fill next <span id="multi-day-count">5</span> days</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="main.js"></script>
 </body>
 </html>

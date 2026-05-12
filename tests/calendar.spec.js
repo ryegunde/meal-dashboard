@@ -11,12 +11,8 @@ test.describe('Calendar & Navigation', () => {
 
   test('should display current week by default', async ({ page }) => {
     const headerDate = await page.textContent('#header-date');
-    const today = new Date();
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const currentMonth = months[today.getMonth()];
-    
-    // Header should contain current month (or next if overlapping)
-    expect(headerDate).toContain(currentMonth);
+    // The browser is mocked to May 11, 2026
+    expect(headerDate).toContain('May');
   });
 
   test('should highlight today', async ({ page }) => {

@@ -177,6 +177,7 @@ function runSimulation() {
                 needed: neededQuantity,
                 have: totalAvailable,
                 deficit: Math.max(0, neededQuantity - totalAvailable),
+                unit: req.unit || '',
                 status: status,
                 needsPrep: status === 'warning'
             });
@@ -267,6 +268,7 @@ function computeDashboardAlerts() {
                     needed: req.needed,
                     have: req.have,
                     deficit: req.deficit,
+                    unit: req.unit,
                     nextStageName,
                     actionDate
                 };
@@ -616,7 +618,8 @@ function renderRecipes() {
     STATE.recipes.forEach(recipe => {
         let ingredientsHTML = recipe.ingredients.map(req => {
             const food = STATE.foods.find(f => f.id === req.foodId);
-            return `${req.quantityPerPortion}x ${food ? food.name : req.foodId}`;
+            const unit = req.unit || 'x';
+            return `${req.quantityPerPortion}${unit} ${food ? food.name : req.foodId}`;
         }).join(', ');
         
         html += `
@@ -710,7 +713,8 @@ function addIngredientRow(ingredient = null) {
 
     row.innerHTML = `
         <select class="ingredient-select">${options}</select>
-        <input type="number" class="ingredient-qty" min="1" step="any" placeholder="Qty" value="${ingredient ? ingredient.quantityPerPortion : ''}">
+        <input type="number" class="ingredient-qty" min="0" step="any" placeholder="Qty" value="${ingredient ? ingredient.quantityPerPortion : ''}">
+        <input type="text" class="ingredient-unit" placeholder="Unit (e.g. g)" value="${ingredient ? (ingredient.unit || '') : ''}">
         <button class="btn-remove" title="Remove"><i class="ph ph-trash"></i></button>
     `;
     
@@ -730,8 +734,9 @@ function saveRecipe() {
     rows.forEach(row => {
         const foodId = row.querySelector('.ingredient-select').value;
         const qty = parseFloat(row.querySelector('.ingredient-qty').value);
-        if(foodId && qty && qty > 0) {
-            ingredients.push({ foodId, quantityPerPortion: qty });
+        const unit = row.querySelector('.ingredient-unit').value.trim();
+        if(foodId && !isNaN(qty)) {
+            ingredients.push({ foodId, quantityPerPortion: qty, unit });
         }
     });
     
@@ -1185,9 +1190,9 @@ function openDebugPanel(mealId) {
                     <span class="status-badge status-${req.status}" style="font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.05);">${req.status === 'success' ? 'Ready' : (req.status === 'error' ? 'Deficit' : 'Prep Needed')}</span>
                 </div>
                 <div class="req-stats">
-                    <div class="req-stat ${req.status}" onclick="app_jumpToInventory('${req.foodId}')" style="cursor: pointer; text-decoration: underline;" title="Click to view in Inventory">Have: ${req.have}</div>
-                    <div class="req-stat">Need: ${req.needed}</div>
-                    ${req.deficit > 0 ? `<div class="req-stat error">Deficit: -${req.deficit}</div>` : ''}
+                    <div class="req-stat ${req.status}" onclick="app_jumpToInventory('${req.foodId}')" style="cursor: pointer; text-decoration: underline;" title="Click to view in Inventory">Have: ${req.have}${req.unit}</div>
+                    <div class="req-stat">Need: ${req.needed}${req.unit}</div>
+                    ${req.deficit > 0 ? `<div class="req-stat error">Deficit: -${req.deficit}${req.unit}</div>` : ''}
                 </div>
             </div>
         `;
@@ -1289,7 +1294,7 @@ function renderDashboard() {
         const isRed  = alert.alertType === 'red';
         const isDue  = alert.actionDate <= todayStr;
         const actionLabel = isRed
-            ? `<strong>Acquire ${alert.deficit.toFixed ? alert.deficit.toFixed(0) : alert.deficit} more</strong> (have ${alert.have}, need ${alert.needed})`
+            ? `<strong>Acquire ${alert.deficit.toFixed ? alert.deficit.toFixed(0) : alert.deficit}${alert.unit || ''} more</strong> (have ${alert.have}${alert.unit || ''}, need ${alert.needed}${alert.unit || ''})`
             : `<strong>Start: ${alert.nextStageName}</strong>`;
         const urgencyClass = isDue ? 'alert-urgency-chip alert-urgency-now' : 'alert-urgency-chip';
 

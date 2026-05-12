@@ -591,12 +591,13 @@ input:focus, select:focus {
 
 .ingredient-builder-item {
     display: flex;
+    flex-wrap: wrap;
     gap: 12px;
     align-items: center;
     margin-bottom: 12px;
 }
-.ingredient-builder-item select { flex: 2; }
-.ingredient-builder-item input { flex: 1; }
+.ingredient-builder-item select { flex: 2; min-width: 150px; }
+.ingredient-builder-item input { flex: 1; min-width: 60px; }
 .ingredient-builder-item .btn-remove {
     background: transparent;
     color: var(--color-red);

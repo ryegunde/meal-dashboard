@@ -213,18 +213,18 @@
       "portions": 1,
       "dishType": "Bowl",
       "ingredients": [
-        { "foodId": "f_quinoa", "quantityPerPortion": 100 },
-        { "foodId": "f_chicken_thighs", "quantityPerPortion": 150 },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 25, "note": "Chickpeas" },
-        { "foodId": "f_kale", "quantityPerPortion": 30 },
-        { "foodId": "f_spinach", "quantityPerPortion": 15 },
-        { "foodId": "f_cucumber", "quantityPerPortion": 75 },
-        { "foodId": "f_tomato", "quantityPerPortion": 25 },
-        { "foodId": "f_arugula", "quantityPerPortion": 15 },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 70, "note": "Tzatziki" },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 30, "note": "Harissa" },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 15, "note": "Pumpkin seeds" },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 6, "note": "Chia seeds" }
+        { "foodId": "f_quinoa", "quantityPerPortion": 100, "unit": "g" },
+        { "foodId": "f_chicken_thighs", "quantityPerPortion": 150, "unit": "g" },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 25, "unit": "g", "note": "Chickpeas" },
+        { "foodId": "f_kale", "quantityPerPortion": 30, "unit": "g" },
+        { "foodId": "f_spinach", "quantityPerPortion": 15, "unit": "g" },
+        { "foodId": "f_cucumber", "quantityPerPortion": 75, "unit": "g" },
+        { "foodId": "f_tomato", "quantityPerPortion": 25, "unit": "g" },
+        { "foodId": "f_arugula", "quantityPerPortion": 15, "unit": "g" },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 70, "unit": "ml", "note": "Tzatziki" },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 30, "unit": "ml", "note": "Harissa" },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 15, "unit": "g", "note": "Pumpkin seeds" },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 6, "unit": "g", "note": "Chia seeds" }
       ]
     },
     {
@@ -233,11 +233,11 @@
       "portions": 1,
       "dishType": "Hash",
       "ingredients": [
-        { "foodId": "f_potato", "quantityPerPortion": 100 },
-        { "foodId": "f_tilapia", "quantityPerPortion": 75 },
-        { "foodId": "f_egg", "quantityPerPortion": 2 },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 30, "note": "Guac" },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 20, "note": "Harissa" }
+        { "foodId": "f_potato", "quantityPerPortion": 100, "unit": "g" },
+        { "foodId": "f_tilapia", "quantityPerPortion": 75, "unit": "g" },
+        { "foodId": "f_egg", "quantityPerPortion": 2, "unit": "pcs" },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 30, "unit": "g", "note": "Guac" },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 20, "unit": "ml", "note": "Harissa" }
       ]
     },
     {
@@ -259,13 +259,13 @@
       "portions": 5,
       "dishType": "Pasta",
       "ingredients": [
-        { "foodId": "f_chicken_breast", "quantityPerPortion": 150 },
-        { "foodId": "f_cauliflower", "quantityPerPortion": 60 },
-        { "foodId": "f_potato", "quantityPerPortion": 60 },
-        { "foodId": "f_milk_2", "quantityPerPortion": 100 },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 5, "note": "Flour" },
-        { "foodId": "f_cheddar", "quantityPerPortion": 12 },
-        { "foodId": "f_jalapeno", "quantityPerPortion": 0.8 }
+        { "foodId": "f_chicken_breast", "quantityPerPortion": 150, "unit": "g" },
+        { "foodId": "f_cauliflower", "quantityPerPortion": 60, "unit": "g" },
+        { "foodId": "f_potato", "quantityPerPortion": 60, "unit": "g" },
+        { "foodId": "f_milk_2", "quantityPerPortion": 100, "unit": "ml" },
+        { "foodId": "f_pantry_generic", "quantityPerPortion": 5, "unit": "g", "note": "Flour" },
+        { "foodId": "f_cheddar", "quantityPerPortion": 12, "unit": "g" },
+        { "foodId": "f_jalapeno", "quantityPerPortion": 0.8, "unit": "pcs" }
       ]
     },
     {

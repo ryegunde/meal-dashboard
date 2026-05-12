@@ -32,7 +32,7 @@ test.describe('Food & Recipe Builders', () => {
     await expect(foodCard.locator('.food-stage-pill')).toContainText('Frozen (5d)');
   });
 
-  test('should create a new recipe', async ({ page }) => {
+  test('should create a new recipe with units', async ({ page }) => {
     await page.click('li[data-view="recipes"]');
     await page.click('#btn-add-recipe');
     
@@ -41,10 +41,13 @@ test.describe('Food & Recipe Builders', () => {
     
     const ingRow = page.locator('.ingredient-builder-item').first();
     await ingRow.locator('.ingredient-select').selectOption({ label: 'Chicken Breast' });
-    await ingRow.locator('.ingredient-qty').fill('1');
+    await ingRow.locator('.ingredient-qty').fill('150');
+    await ingRow.locator('.ingredient-unit').fill('g');
     
     await page.click('#btn-save-recipe');
-    await expect(page.locator('.recipe-item:has-text("Quick Bowl")')).toBeVisible();
+    const recipeItem = page.locator('.recipe-item:has-text("Quick Bowl")');
+    await expect(recipeItem).toBeVisible();
+    await expect(recipeItem).toContainText('150g Chicken Breast');
   });
 
   test('should delete a recipe and remove from calendar', async ({ page }) => {

@@ -596,8 +596,18 @@ input:focus, select:focus {
     align-items: center;
     margin-bottom: 12px;
 }
-.ingredient-builder-item select { flex: 2; min-width: 150px; }
+.ingredient-builder-item select.ingredient-select { flex: 2; min-width: 150px; }
 .ingredient-builder-item input { flex: 1; min-width: 60px; }
+.ingredient-builder-item .ingredient-unit-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-accent);
+    min-width: 40px;
+    text-align: center;
+    background: rgba(99,102,241,0.1);
+    border-radius: 4px;
+    padding: 2px 8px;
+}
 .ingredient-builder-item .btn-remove {
     background: transparent;
     color: var(--color-red);
@@ -607,6 +617,18 @@ input:focus, select:focus {
     padding: 4px;
 }
 .ingredient-builder-item .btn-remove:hover { color: #fff; }
+
+.food-unit-badge {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: monospace;
+    color: var(--color-accent);
+    background: rgba(99,102,241,0.12);
+    border: 1px solid rgba(99,102,241,0.25);
+    border-radius: 4px;
+    padding: 1px 6px;
+    letter-spacing: 0.5px;
+}
 
 /* Modal Search Box */
 .search-box {

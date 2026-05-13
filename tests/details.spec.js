@@ -3,9 +3,9 @@ import { test, expect } from '@playwright/test';
 test.describe('Meal Details and Navigation', () => {
     const testData = {
         foods: [
-            { id: 'f_success', name: 'Ready Food', stages: [{ id: 's_r', name: 'Ready', daysBefore: 0 }] },
-            { id: 'f_warning', name: 'Prep Food', stages: [{ id: 's_p', name: 'Prep', daysBefore: 1 }, { id: 's_r', name: 'Ready', daysBefore: 0 }] },
-            { id: 'f_error', name: 'Missing Food', stages: [{ id: 's_r', name: 'Ready', daysBefore: 0 }] }
+            { id: 'f_success', name: 'Ready Food', unit: 'g', stages: [{ id: 's_r', name: 'Ready', daysBefore: 0 }] },
+            { id: 'f_warning', name: 'Prep Food', unit: 'g', stages: [{ id: 's_p', name: 'Prep', daysBefore: 1 }, { id: 's_r', name: 'Ready', daysBefore: 0 }] },
+            { id: 'f_error', name: 'Missing Food', unit: 'g', stages: [{ id: 's_r', name: 'Ready', daysBefore: 0 }] }
         ],
         inventory: [
             { foodId: 'f_success', stageQuantities: { 's_r': 100 } },

@@ -1,6 +1,88 @@
 // Phase 1 MVP - Main Logic
 // Uses hardcoded data to test color simulation and read-only calendar view
 
+// --- UNIT SYSTEM ---
+const UNIT_CONVERSIONS = {
+    g:    { group: 'mass',   toBase: 1 },
+    kg:   { group: 'mass',   toBase: 1000 },
+    oz:   { group: 'mass',   toBase: 28.3495 },
+    lb:   { group: 'mass',   toBase: 453.592 },
+    ml:   { group: 'volume', toBase: 1 },
+    L:    { group: 'volume', toBase: 1000 },
+    tsp:  { group: 'volume', toBase: 4.92892 },
+    tbsp: { group: 'volume', toBase: 14.7868 },
+    cup:  { group: 'volume', toBase: 236.588 },
+    item: { group: 'count',  toBase: 1 }
+};
+window.UNIT_CONVERSIONS = UNIT_CONVERSIONS;
+
+function getConversionFactor(fromUnit, toUnit) {
+    if (fromUnit === toUnit) return 1;
+    const from = UNIT_CONVERSIONS[fromUnit];
+    const to   = UNIT_CONVERSIONS[toUnit];
+    if (!from || !to) return null;
+    if (from.group !== to.group) return null;
+    if (from.group === 'count') return null; // item <-> item only via same-unit path
+    return from.toBase / to.toBase;
+}
+window.getConversionFactor = getConversionFactor;
+
+function convertFoodUnit(foodId, fromUnit, toUnit) {
+    const factor = getConversionFactor(fromUnit, toUnit);
+    const food = STATE.foods.find(f => f.id === foodId);
+    if (!food) return { converted: false, factor: null };
+
+    const applyFactor = (qty) => factor !== null ? parseFloat((qty * factor).toFixed(6)) : 0;
+
+    // 1. Convert portionSize
+    if (food.portionSize) food.portionSize = applyFactor(food.portionSize);
+
+    // 2. Convert inventory stage quantities
+    const inv = STATE.inventory.find(i => i.foodId === foodId);
+    if (inv) {
+        Object.keys(inv.stageQuantities).forEach(key => {
+            inv.stageQuantities[key] = applyFactor(inv.stageQuantities[key]);
+        });
+    }
+
+    // 3. Convert all recipe ingredient quantities referencing this food
+    STATE.recipes.forEach(recipe => {
+        recipe.ingredients.forEach(ing => {
+            if (ing.foodId === foodId) {
+                ing.quantityPerPortion = applyFactor(ing.quantityPerPortion);
+            }
+        });
+    });
+
+    // 4. Update the food's unit
+    food.unit = toUnit;
+
+    return { converted: factor !== null, factor };
+}
+window.convertFoodUnit = convertFoodUnit;
+
+// --- SCHEMA MIGRATION ---
+function migrateSchema(data) {
+    if ((data.schemaVersion || 1) >= 2) return data;
+    // Backfill food.unit from first matching ingredient.unit
+    (data.foods || []).forEach(food => {
+        if (!food.unit) {
+            let found = 'g';
+            for (const recipe of (data.recipes || [])) {
+                const ing = recipe.ingredients.find(i => i.foodId === food.id && i.unit);
+                if (ing) { found = ing.unit; break; }
+            }
+            food.unit = found;
+        }
+    });
+    // Strip unit from recipe ingredients
+    (data.recipes || []).forEach(recipe => {
+        recipe.ingredients.forEach(ing => { delete ing.unit; });
+    });
+    data.schemaVersion = 2;
+    return data;
+}
+
 const STATE = {
     foods: [],
     inventory: [],
@@ -42,6 +124,7 @@ async function initApp() {
             console.log("Loaded fallback seed data");
         }
         
+        data = migrateSchema(data);
         STATE.foods = data.foods || [];
         STATE.inventory = data.inventory || [];
         STATE.recipes = data.recipes || [];
@@ -177,7 +260,7 @@ function runSimulation() {
                 needed: neededQuantity,
                 have: totalAvailable,
                 deficit: Math.max(0, neededQuantity - totalAvailable),
-                unit: req.unit || '',
+                unit: food?.unit || '',
                 status: status,
                 needsPrep: status === 'warning'
             });
@@ -618,7 +701,7 @@ function renderRecipes() {
     STATE.recipes.forEach(recipe => {
         let ingredientsHTML = recipe.ingredients.map(req => {
             const food = STATE.foods.find(f => f.id === req.foodId);
-            const unit = req.unit || 'x';
+            const unit = food?.unit || '';
             return `${req.quantityPerPortion}${unit} ${food ? food.name : req.foodId}`;
         }).join(', ');
         
@@ -711,12 +794,22 @@ function addIngredientRow(ingredient = null) {
         options += `<option value="${f.id}" ${isSelected}>${f.name}</option>`;
     });
 
+    // Derive initial unit from selected food
+    const initFood = ingredient ? STATE.foods.find(f => f.id === ingredient.foodId) : null;
+    const initUnit = initFood?.unit || '—';
+
     row.innerHTML = `
         <select class="ingredient-select">${options}</select>
         <input type="number" class="ingredient-qty" min="0" step="any" placeholder="Qty" value="${ingredient ? ingredient.quantityPerPortion : ''}">
-        <input type="text" class="ingredient-unit" placeholder="Unit (e.g. g)" value="${ingredient ? (ingredient.unit || '') : ''}">
+        <span class="ingredient-unit-label">${initUnit}</span>
         <button class="btn-remove" title="Remove"><i class="ph ph-trash"></i></button>
     `;
+
+    // Auto-update unit label when food changes
+    row.querySelector('.ingredient-select').addEventListener('change', (e) => {
+        const food = STATE.foods.find(f => f.id === e.target.value);
+        row.querySelector('.ingredient-unit-label').textContent = food?.unit || '—';
+    });
     
     row.querySelector('.btn-remove').addEventListener('click', () => row.remove());
     container.appendChild(row);
@@ -734,9 +827,8 @@ function saveRecipe() {
     rows.forEach(row => {
         const foodId = row.querySelector('.ingredient-select').value;
         const qty = parseFloat(row.querySelector('.ingredient-qty').value);
-        const unit = row.querySelector('.ingredient-unit').value.trim();
         if(foodId && !isNaN(qty)) {
-            ingredients.push({ foodId, quantityPerPortion: qty, unit });
+            ingredients.push({ foodId, quantityPerPortion: qty });
         }
     });
     
@@ -796,7 +888,10 @@ function renderFoods() {
             foodsHTML += `
                 <div class="recipe-item" data-food-id="${food.id}" style="border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; margin-bottom: 12px; background: rgba(255,255,255,0.02);">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
-                        <h3 style="margin: 0; font-size: 16px;">${food.name}</h3>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h3 style="margin: 0; font-size: 16px;">${food.name}</h3>
+                            <span class="food-unit-badge">[${food.unit || '?'}]</span>
+                        </div>
                         <div style="display: flex; gap: 4px;">
                             <button class="icon-btn btn-edit-food"><i class="ph ph-pencil-simple"></i></button>
                             <button class="icon-btn btn-delete-food" style="color: var(--color-red);"><i class="ph ph-trash"></i></button>
@@ -841,9 +936,16 @@ function setupFoodBuilder() {
         document.querySelector('#food-modal h2').textContent = 'Define Food Pipeline';
         document.getElementById('food-name').value = '';
         document.getElementById('food-category').value = '';
+        document.getElementById('food-unit').value = 'g';
+        document.getElementById('food-portion-unit-label').textContent = 'g';
+        document.getElementById('food-portion-size').value = '';
         document.getElementById('stage-builder-list').innerHTML = '';
         addStageRow();
         document.getElementById('food-modal').classList.remove('hidden');
+    });
+
+    document.getElementById('food-unit').addEventListener('change', (e) => {
+        document.getElementById('food-portion-unit-label').textContent = e.target.value;
     });
 
     document.getElementById('close-food-modal').addEventListener('click', () => {
@@ -873,6 +975,9 @@ function openEditFoodModal(foodId) {
     document.querySelector('#food-modal h2').textContent = 'Edit Food Pipeline';
     document.getElementById('food-name').value = food.name;
     document.getElementById('food-category').value = food.category || '';
+    document.getElementById('food-unit').value = food.unit || 'g';
+    document.getElementById('food-portion-unit-label').textContent = food.unit || 'g';
+    document.getElementById('food-unit').dataset.originalUnit = food.unit || 'g';
     document.getElementById('food-portion-size').value = food.portionSize || '';
     document.getElementById('stage-builder-list').innerHTML = '';
     
@@ -920,6 +1025,7 @@ function saveFood() {
     const name = document.getElementById('food-name').value.trim();
     const category = document.getElementById('food-category').value.trim() || 'Uncategorized';
     const portionSize = parseFloat(document.getElementById('food-portion-size').value) || 0;
+    const newUnit = document.getElementById('food-unit').value || 'g';
     if(!name) return alert('Food name is required');
     
     const stages = [];
@@ -953,10 +1059,27 @@ function saveFood() {
     stages.sort((a, b) => b.daysBefore - a.daysBefore); // Sort Start -> Finish
 
     if (editingFoodId) {
+        const oldUnit = document.getElementById('food-unit').dataset.originalUnit || newUnit;
+        
+        if (oldUnit !== newUnit) {
+            const factor = getConversionFactor(oldUnit, newUnit);
+            const isCrossGroup = factor === null;
+            const msg = isCrossGroup
+                ? `Changing to '${newUnit}' is incompatible with '${oldUnit}'. All inventory quantities and recipe amounts for this food will be reset to 0. Continue?`
+                : `Changing from ${oldUnit} to ${newUnit} will automatically convert all inventory and recipe quantities. Continue?`;
+            if (!confirm(msg)) {
+                document.getElementById('food-unit').value = oldUnit;
+                document.getElementById('food-portion-unit-label').textContent = oldUnit;
+                return;
+            }
+            convertFoodUnit(editingFoodId, oldUnit, newUnit);
+        }
+
         const foodIndex = STATE.foods.findIndex(f => f.id === editingFoodId);
         if (foodIndex > -1) {
             STATE.foods[foodIndex].name = name;
             STATE.foods[foodIndex].category = category;
+            STATE.foods[foodIndex].unit = newUnit;
             STATE.foods[foodIndex].portionSize = portionSize;
             STATE.foods[foodIndex].stages = stages;
             
@@ -974,6 +1097,7 @@ function saveFood() {
             id: 'f_' + Date.now(),
             name,
             category,
+            unit: newUnit,
             portionSize,
             stages
         };
@@ -1035,7 +1159,7 @@ function renderInventory() {
                                    step="any"
                                    placeholder="Portions"
                                    style="width: 80px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--color-accent); font-size: 13px; font-weight: 600; text-align: center;">
-                            <span style="font-size: 11px; color: var(--text-secondary);">portions</span>
+                            <span style="font-size: 11px; color: var(--text-secondary);">portions (${food.portionSize}${food.unit || ''} each)</span>
                         </div>
                     `;
                 }
@@ -1057,7 +1181,7 @@ function renderInventory() {
                                        min="0" 
                                        step="any"
                                        style="width: 80px; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-family: inherit;">
-                                <span style="font-size: 12px; color: var(--text-secondary);">g</span>
+                                <span style="font-size: 12px; color: var(--text-secondary);">${food.unit || ""}</span>
                             </div>
                         </div>
                     </div>
@@ -1071,7 +1195,7 @@ function renderInventory() {
                     <div class="inventory-accordion-header">
                         <div>
                             <span>${food.name}</span>
-                            <span style="font-size: 12px; color: var(--text-secondary); margin-left: 12px;">Total: <span class="inv-total-sum">${totalQty}</span></span>
+                            <span style="font-size: 12px; color: var(--text-secondary); margin-left: 12px;">Total: <span class="inv-total-sum">${totalQty}</span> ${food.unit || ''}</span>
                         </div>
                         <i class="ph ph-caret-down accordion-icon"></i>
                     </div>

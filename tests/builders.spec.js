@@ -42,7 +42,8 @@ test.describe('Food & Recipe Builders', () => {
     const ingRow = page.locator('.ingredient-builder-item').first();
     await ingRow.locator('.ingredient-select').selectOption({ label: 'Chicken Breast' });
     await ingRow.locator('.ingredient-qty').fill('150');
-    await ingRow.locator('.ingredient-unit').fill('g');
+    // Unit is now a read-only label derived from the food - verify it shows 'g'
+    await expect(ingRow.locator('.ingredient-unit-label')).toHaveText('g');
     
     await page.click('#btn-save-recipe');
     const recipeItem = page.locator('.recipe-item:has-text("Quick Bowl")');

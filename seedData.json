@@ -1,9 +1,11 @@
 {
+  "schemaVersion": 2,
   "foods": [
     {
       "id": "f_chicken_breast",
       "name": "Chicken Breast",
       "category": "Proteins",
+      "unit": "g",
       "portionSize": 150,
       "stages": [
         { "id": "s_cb_fridge", "name": "Fridge (3 day timer)", "daysBefore": 2, "activeTimeMin": 0, "passiveTimeMin": 0 },
@@ -15,6 +17,7 @@
       "id": "f_chicken_thighs",
       "name": "Chicken Thighs",
       "category": "Proteins",
+      "unit": "g",
       "portionSize": 150,
       "stages": [
         { "id": "s_ct_fridge", "name": "Fridge (3 day timer)", "daysBefore": 2, "activeTimeMin": 0, "passiveTimeMin": 0 },
@@ -26,6 +29,7 @@
       "id": "f_tilapia",
       "name": "Tilapia",
       "category": "Proteins",
+      "unit": "g",
       "portionSize": 150,
       "stages": [
         { "id": "s_t_fridge", "name": "Fridge (3 day timer)", "daysBefore": 2, "activeTimeMin": 0, "passiveTimeMin": 0 },
@@ -37,6 +41,8 @@
       "id": "f_egg",
       "name": "Egg",
       "category": "Proteins",
+      "unit": "item",
+      "portionSize": 1,
       "stages": [
         { "id": "s_e_fridge", "name": "Fridge (3 day timer)", "daysBefore": 2, "activeTimeMin": 0, "passiveTimeMin": 0 },
         { "id": "s_e_cook", "name": "Cook/Portion - Ready", "daysBefore": 0, "activeTimeMin": 15, "passiveTimeMin": 11 }
@@ -46,6 +52,7 @@
       "id": "f_quinoa",
       "name": "Quinoa",
       "category": "Grains",
+      "unit": "g",
       "stages": [
         { "id": "s_q_dry", "name": "Dry", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
         { "id": "s_q_cooked", "name": "Cooked", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 15 }
@@ -55,6 +62,7 @@
       "id": "f_white_rice",
       "name": "White Rice",
       "category": "Grains",
+      "unit": "g",
       "stages": [
         { "id": "s_wr_dry", "name": "Dry", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
         { "id": "s_wr_cooked", "name": "Cooked", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 20 }
@@ -64,6 +72,7 @@
       "id": "f_potato",
       "name": "Potato",
       "category": "Veggies",
+      "unit": "g",
       "stages": [
         { "id": "s_p_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
         { "id": "s_p_prepped", "name": "Peeled/Cut", "daysBefore": 0, "activeTimeMin": 10, "passiveTimeMin": 0 },
@@ -74,6 +83,7 @@
       "id": "f_cauliflower",
       "name": "Cauliflower",
       "category": "Veggies",
+      "unit": "g",
       "stages": [
         { "id": "s_ca_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
         { "id": "s_ca_cooked", "name": "Cooked", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 15 }
@@ -83,6 +93,7 @@
       "id": "f_spinach",
       "name": "Spinach",
       "category": "Veggies",
+      "unit": "g",
       "stages": [
         { "id": "s_sp_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
         { "id": "s_sp_washed", "name": "Washed", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 0 }
@@ -92,6 +103,7 @@
       "id": "f_kale",
       "name": "Kale",
       "category": "Veggies",
+      "unit": "g",
       "stages": [
         { "id": "s_k_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
         { "id": "s_k_washed", "name": "Washed", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 0 }
@@ -101,6 +113,7 @@
       "id": "f_arugula",
       "name": "Arugula",
       "category": "Veggies",
+      "unit": "g",
       "stages": [
         { "id": "s_ar_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
         { "id": "s_ar_washed", "name": "Washed", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 0 }
@@ -110,6 +123,7 @@
       "id": "f_tomato",
       "name": "Tomato",
       "category": "Veggies",
+      "unit": "g",
       "stages": [
         { "id": "s_to_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
         { "id": "s_to_cut", "name": "Cut", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 0 }
@@ -119,6 +133,7 @@
       "id": "f_cucumber",
       "name": "Cucumber",
       "category": "Veggies",
+      "unit": "g",
       "stages": [
         { "id": "s_cu_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
         { "id": "s_cu_cut", "name": "Cut", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 0 }
@@ -128,6 +143,7 @@
       "id": "f_onion",
       "name": "Onion",
       "category": "Veggies",
+      "unit": "item",
       "stages": [
         { "id": "s_on_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
         { "id": "s_on_cut", "name": "Cut", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 0 }
@@ -137,6 +153,7 @@
       "id": "f_pepper",
       "name": "Pepper",
       "category": "Veggies",
+      "unit": "item",
       "stages": [
         { "id": "s_pe_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
         { "id": "s_pe_cut", "name": "Cut", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 0 }
@@ -146,23 +163,18 @@
       "id": "f_jalapeno",
       "name": "Jalapeño",
       "category": "Veggies",
+      "unit": "item",
+      "portionSize": 1,
       "stages": [
         { "id": "s_ja_raw", "name": "Raw", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 },
         { "id": "s_ja_cut", "name": "Cut", "daysBefore": 0, "activeTimeMin": 5, "passiveTimeMin": 0 }
       ]
     },
     {
-      "id": "f_pantry_generic",
-      "name": "Pantry Item",
-      "category": "Pantry",
-      "stages": [
-        { "id": "s_p_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
-      ]
-    },
-    {
       "id": "f_milk_2",
       "name": "2% Milk",
       "category": "Dairy",
+      "unit": "ml",
       "stages": [
         { "id": "s_milk_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
       ]
@@ -171,6 +183,7 @@
       "id": "f_cheddar",
       "name": "Cheddar Cheese",
       "category": "Dairy",
+      "unit": "g",
       "stages": [
         { "id": "s_cheddar_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
       ]
@@ -179,8 +192,126 @@
       "id": "f_parmesan",
       "name": "Parmesan Cheese",
       "category": "Dairy",
+      "unit": "g",
       "stages": [
         { "id": "s_parmesan_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_chickpeas",
+      "name": "Chickpeas",
+      "category": "Pantry",
+      "unit": "g",
+      "stages": [
+        { "id": "s_chickpeas_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_tzatziki",
+      "name": "Tzatziki",
+      "category": "Pantry",
+      "unit": "ml",
+      "stages": [
+        { "id": "s_tzatziki_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_harissa",
+      "name": "Harissa",
+      "category": "Pantry",
+      "unit": "ml",
+      "stages": [
+        { "id": "s_harissa_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_pumpkin_seeds",
+      "name": "Pumpkin Seeds",
+      "category": "Pantry",
+      "unit": "g",
+      "stages": [
+        { "id": "s_pumpkin_seeds_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_chia_seeds",
+      "name": "Chia Seeds",
+      "category": "Pantry",
+      "unit": "g",
+      "stages": [
+        { "id": "s_chia_seeds_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_guac",
+      "name": "Guacamole",
+      "category": "Pantry",
+      "unit": "g",
+      "stages": [
+        { "id": "s_guac_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_olive_oil",
+      "name": "Olive Oil",
+      "category": "Pantry",
+      "unit": "ml",
+      "stages": [
+        { "id": "s_olive_oil_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_garlic",
+      "name": "Garlic",
+      "category": "Pantry",
+      "unit": "g",
+      "stages": [
+        { "id": "s_garlic_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_tomato_sauce",
+      "name": "Tomato Sauce",
+      "category": "Pantry",
+      "unit": "ml",
+      "stages": [
+        { "id": "s_tomato_sauce_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_evap_milk",
+      "name": "Evaporated Milk",
+      "category": "Pantry",
+      "unit": "ml",
+      "stages": [
+        { "id": "s_evap_milk_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_flour",
+      "name": "Flour",
+      "category": "Pantry",
+      "unit": "g",
+      "stages": [
+        { "id": "s_flour_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_corn",
+      "name": "Corn",
+      "category": "Pantry",
+      "unit": "g",
+      "stages": [
+        { "id": "s_corn_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
+      ]
+    },
+    {
+      "id": "f_beans",
+      "name": "Beans",
+      "category": "Pantry",
+      "unit": "g",
+      "stages": [
+        { "id": "s_beans_ready", "name": "Ready", "daysBefore": 0, "activeTimeMin": 0, "passiveTimeMin": 0 }
       ]
     }
   ],
@@ -201,10 +332,22 @@
     { "foodId": "f_onion", "stageQuantities": { "s_on_raw": 0, "s_on_cut": 0 } },
     { "foodId": "f_pepper", "stageQuantities": { "s_pe_raw": 0, "s_pe_cut": 0 } },
     { "foodId": "f_jalapeno", "stageQuantities": { "s_ja_raw": 0, "s_ja_cut": 0 } },
-    { "foodId": "f_pantry_generic", "stageQuantities": { "s_p_ready": 0 } },
     { "foodId": "f_milk_2", "stageQuantities": { "s_milk_ready": 0 } },
     { "foodId": "f_cheddar", "stageQuantities": { "s_cheddar_ready": 0 } },
-    { "foodId": "f_parmesan", "stageQuantities": { "s_parmesan_ready": 0 } }
+    { "foodId": "f_parmesan", "stageQuantities": { "s_parmesan_ready": 0 } },
+    { "foodId": "f_chickpeas", "stageQuantities": { "s_chickpeas_ready": 0 } },
+    { "foodId": "f_tzatziki", "stageQuantities": { "s_tzatziki_ready": 0 } },
+    { "foodId": "f_harissa", "stageQuantities": { "s_harissa_ready": 0 } },
+    { "foodId": "f_pumpkin_seeds", "stageQuantities": { "s_pumpkin_seeds_ready": 0 } },
+    { "foodId": "f_chia_seeds", "stageQuantities": { "s_chia_seeds_ready": 0 } },
+    { "foodId": "f_guac", "stageQuantities": { "s_guac_ready": 0 } },
+    { "foodId": "f_olive_oil", "stageQuantities": { "s_olive_oil_ready": 0 } },
+    { "foodId": "f_garlic", "stageQuantities": { "s_garlic_ready": 0 } },
+    { "foodId": "f_tomato_sauce", "stageQuantities": { "s_tomato_sauce_ready": 0 } },
+    { "foodId": "f_evap_milk", "stageQuantities": { "s_evap_milk_ready": 0 } },
+    { "foodId": "f_flour", "stageQuantities": { "s_flour_ready": 0 } },
+    { "foodId": "f_corn", "stageQuantities": { "s_corn_ready": 0 } },
+    { "foodId": "f_beans", "stageQuantities": { "s_beans_ready": 0 } }
   ],
   "recipes": [
     {
@@ -213,18 +356,18 @@
       "portions": 1,
       "dishType": "Bowl",
       "ingredients": [
-        { "foodId": "f_quinoa", "quantityPerPortion": 100, "unit": "g" },
-        { "foodId": "f_chicken_thighs", "quantityPerPortion": 150, "unit": "g" },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 25, "unit": "g", "note": "Chickpeas" },
-        { "foodId": "f_kale", "quantityPerPortion": 30, "unit": "g" },
-        { "foodId": "f_spinach", "quantityPerPortion": 15, "unit": "g" },
-        { "foodId": "f_cucumber", "quantityPerPortion": 75, "unit": "g" },
-        { "foodId": "f_tomato", "quantityPerPortion": 25, "unit": "g" },
-        { "foodId": "f_arugula", "quantityPerPortion": 15, "unit": "g" },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 70, "unit": "ml", "note": "Tzatziki" },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 30, "unit": "ml", "note": "Harissa" },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 15, "unit": "g", "note": "Pumpkin seeds" },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 6, "unit": "g", "note": "Chia seeds" }
+        { "foodId": "f_quinoa", "quantityPerPortion": 100 },
+        { "foodId": "f_chicken_thighs", "quantityPerPortion": 150 },
+        { "foodId": "f_chickpeas", "quantityPerPortion": 25 },
+        { "foodId": "f_kale", "quantityPerPortion": 30 },
+        { "foodId": "f_spinach", "quantityPerPortion": 15 },
+        { "foodId": "f_cucumber", "quantityPerPortion": 75 },
+        { "foodId": "f_tomato", "quantityPerPortion": 25 },
+        { "foodId": "f_arugula", "quantityPerPortion": 15 },
+        { "foodId": "f_tzatziki", "quantityPerPortion": 70 },
+        { "foodId": "f_harissa", "quantityPerPortion": 30 },
+        { "foodId": "f_pumpkin_seeds", "quantityPerPortion": 15 },
+        { "foodId": "f_chia_seeds", "quantityPerPortion": 6 }
       ]
     },
     {
@@ -233,11 +376,11 @@
       "portions": 1,
       "dishType": "Hash",
       "ingredients": [
-        { "foodId": "f_potato", "quantityPerPortion": 100, "unit": "g" },
-        { "foodId": "f_tilapia", "quantityPerPortion": 75, "unit": "g" },
-        { "foodId": "f_egg", "quantityPerPortion": 2, "unit": "pcs" },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 30, "unit": "g", "note": "Guac" },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 20, "unit": "ml", "note": "Harissa" }
+        { "foodId": "f_potato", "quantityPerPortion": 100 },
+        { "foodId": "f_tilapia", "quantityPerPortion": 75 },
+        { "foodId": "f_egg", "quantityPerPortion": 2 },
+        { "foodId": "f_guac", "quantityPerPortion": 30 },
+        { "foodId": "f_harissa", "quantityPerPortion": 20 }
       ]
     },
     {
@@ -246,11 +389,11 @@
       "portions": 5,
       "dishType": "Pasta",
       "ingredients": [
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 4, "note": "Olive oil" },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 6, "note": "Garlic" },
+        { "foodId": "f_olive_oil", "quantityPerPortion": 4 },
+        { "foodId": "f_garlic", "quantityPerPortion": 6 },
         { "foodId": "f_onion", "quantityPerPortion": 0.2 },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 170, "note": "Tomato sauce" },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 50, "note": "Evaporated milk" }
+        { "foodId": "f_tomato_sauce", "quantityPerPortion": 170 },
+        { "foodId": "f_evap_milk", "quantityPerPortion": 50 }
       ]
     },
     {
@@ -259,13 +402,13 @@
       "portions": 5,
       "dishType": "Pasta",
       "ingredients": [
-        { "foodId": "f_chicken_breast", "quantityPerPortion": 150, "unit": "g" },
-        { "foodId": "f_cauliflower", "quantityPerPortion": 60, "unit": "g" },
-        { "foodId": "f_potato", "quantityPerPortion": 60, "unit": "g" },
-        { "foodId": "f_milk_2", "quantityPerPortion": 100, "unit": "ml" },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 5, "unit": "g", "note": "Flour" },
-        { "foodId": "f_cheddar", "quantityPerPortion": 12, "unit": "g" },
-        { "foodId": "f_jalapeno", "quantityPerPortion": 0.8, "unit": "pcs" }
+        { "foodId": "f_chicken_breast", "quantityPerPortion": 150 },
+        { "foodId": "f_cauliflower", "quantityPerPortion": 60 },
+        { "foodId": "f_potato", "quantityPerPortion": 60 },
+        { "foodId": "f_milk_2", "quantityPerPortion": 100 },
+        { "foodId": "f_flour", "quantityPerPortion": 5 },
+        { "foodId": "f_cheddar", "quantityPerPortion": 12 },
+        { "foodId": "f_jalapeno", "quantityPerPortion": 0.8 }
       ]
     },
     {
@@ -277,11 +420,11 @@
         { "foodId": "f_white_rice", "quantityPerPortion": 100 },
         { "foodId": "f_chicken_thighs", "quantityPerPortion": 150 },
         { "foodId": "f_pepper", "quantityPerPortion": 0.6 },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 25, "note": "Corn" },
+        { "foodId": "f_corn", "quantityPerPortion": 25 },
         { "foodId": "f_onion", "quantityPerPortion": 0.2 },
-        { "foodId": "f_tomato", "quantityPerPortion": 1 },
+        { "foodId": "f_tomato", "quantityPerPortion": 100 },
         { "foodId": "f_jalapeno", "quantityPerPortion": 0.2 },
-        { "foodId": "f_pantry_generic", "quantityPerPortion": 170, "note": "Beans" }
+        { "foodId": "f_beans", "quantityPerPortion": 170 }
       ]
     }
   ],

@@ -63,23 +63,34 @@ window.convertFoodUnit = convertFoodUnit;
 
 // --- SCHEMA MIGRATION ---
 function migrateSchema(data) {
-    if ((data.schemaVersion || 1) >= 2) return data;
-    // Backfill food.unit from first matching ingredient.unit
-    (data.foods || []).forEach(food => {
-        if (!food.unit) {
-            let found = 'g';
-            for (const recipe of (data.recipes || [])) {
-                const ing = recipe.ingredients.find(i => i.foodId === food.id && i.unit);
-                if (ing) { found = ing.unit; break; }
+    if ((data.schemaVersion || 1) < 2) {
+        // Backfill food.unit from first matching ingredient.unit
+        (data.foods || []).forEach(food => {
+            if (!food.unit) {
+                let found = 'g';
+                for (const recipe of (data.recipes || [])) {
+                    const ing = recipe.ingredients.find(i => i.foodId === food.id && i.unit);
+                    if (ing) { found = ing.unit; break; }
+                }
+                food.unit = found;
             }
-            food.unit = found;
-        }
-    });
-    // Strip unit from recipe ingredients
-    (data.recipes || []).forEach(recipe => {
-        recipe.ingredients.forEach(ing => { delete ing.unit; });
-    });
-    data.schemaVersion = 2;
+        });
+        // Strip unit from recipe ingredients
+        (data.recipes || []).forEach(recipe => {
+            recipe.ingredients.forEach(ing => { delete ing.unit; });
+        });
+    }
+
+    // Migrate recipe dishType values (version 3)
+    if ((data.schemaVersion || 1) < 3) {
+        (data.recipes || []).forEach(recipe => {
+            if (recipe.dishType !== 'Complete dish' && recipe.dishType !== 'Component dish') {
+                recipe.dishType = 'Component dish';
+            }
+        });
+        data.schemaVersion = 3;
+    }
+    
     return data;
 }
 
@@ -87,6 +98,8 @@ const STATE = {
     foods: [],
     inventory: [],
     recipes: [],
+    recipeInventory: [],
+    masteryTasks: [],
     scheduledMeals: [],
     computedMeals: [],
     dashboardAlerts: [],
@@ -129,6 +142,8 @@ async function initApp() {
         STATE.inventory = data.inventory || [];
         STATE.recipes = data.recipes || [];
         STATE.scheduledMeals = data.scheduledMeals || [];
+        STATE.recipeInventory = data.recipeInventory || [];
+        STATE.masteryTasks = data.masteryTasks || [];
         
         // 2. Initialize Calendar Date (Start of current week in NY time)
         const now = getNewYorkDate();
@@ -156,7 +171,9 @@ function saveState() {
         foods: STATE.foods,
         inventory: STATE.inventory,
         recipes: STATE.recipes,
-        scheduledMeals: STATE.scheduledMeals
+        scheduledMeals: STATE.scheduledMeals,
+        recipeInventory: STATE.recipeInventory || [],
+        masteryTasks: STATE.masteryTasks || []
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
 }
@@ -174,23 +191,34 @@ function processMidnightCleanup() {
             if (meal.date < todayStr && !meal.consumed) {
                 const recipe = STATE.recipes.find(r => r.id === meal.recipeId);
                 if (recipe) {
-                    recipe.ingredients.forEach(req => {
-                        const food = STATE.foods.find(f => f.id === req.foodId);
-                        const inv = STATE.inventory.find(i => i.foodId === req.foodId);
-                        if (food && inv && food.stages && food.stages.length > 0) {
-                            // Subtract from the FINAL stage of the food pipeline
-                            const finalStage = food.stages[food.stages.length - 1];
-                            const finalStageId = finalStage.id;
-                            const neededQuantity = req.quantityPerPortion * recipe.portions;
-                            
-                            if (inv.stageQuantities[finalStageId] !== undefined) {
-                                const oldVal = inv.stageQuantities[finalStageId];
-                                inv.stageQuantities[finalStageId] = Math.max(0, oldVal - neededQuantity);
-                                changed = true;
-                                console.log(`  - Subtracted ${neededQuantity} of ${food.name} (Stage: ${finalStage.name})`);
-                            }
+                    if (recipe.dishType === 'Complete dish') {
+                        let invItem = STATE.recipeInventory.find(i => i.recipeId === recipe.id);
+                        if (!invItem) {
+                            invItem = { recipeId: recipe.id, portions: 0 };
+                            STATE.recipeInventory.push(invItem);
                         }
-                    });
+                        invItem.portions = Math.max(0, invItem.portions - 1);
+                        changed = true;
+                        console.log(`  - Subtracted 1 portion of Complete Dish: ${recipe.name}`);
+                    } else {
+                        recipe.ingredients.forEach(req => {
+                            const food = STATE.foods.find(f => f.id === req.foodId);
+                            const inv = STATE.inventory.find(i => i.foodId === req.foodId);
+                            if (food && inv && food.stages && food.stages.length > 0) {
+                                // Subtract from the FINAL stage of the food pipeline
+                                const finalStage = food.stages[food.stages.length - 1];
+                                const finalStageId = finalStage.id;
+                                const neededQuantity = req.quantityPerPortion * recipe.portions;
+                                
+                                if (inv.stageQuantities[finalStageId] !== undefined) {
+                                    const oldVal = inv.stageQuantities[finalStageId];
+                                    inv.stageQuantities[finalStageId] = Math.max(0, oldVal - neededQuantity);
+                                    changed = true;
+                                    console.log(`  - Subtracted ${neededQuantity} of ${food.name} (Stage: ${finalStage.name})`);
+                                }
+                            }
+                        });
+                    }
                 }
                 meal.consumed = true;
                 changed = true;
@@ -227,43 +255,66 @@ function runSimulation() {
         let mealStatus = 'Green';
         let allIngredients = [];
 
-        for (const req of recipe.ingredients) {
-            const food = STATE.foods.find(f => f.id === req.foodId);
-            const inv = STATE.inventory.find(i => i.foodId === req.foodId);
-            const neededQuantity = req.quantityPerPortion * recipe.portions;
-            
-            // Check total quantity across all stages
-            let totalAvailable = 0;
-            let finalStageAvailable = 0;
-            
-            if(inv) {
-                const finalStageId = food.stages[food.stages.length - 1].id;
-                finalStageAvailable = inv.stageQuantities[finalStageId] || 0;
-                
-                Object.values(inv.stageQuantities).forEach(qty => {
-                    totalAvailable += qty;
-                });
-            }
-            
+        if (recipe.dishType === 'Complete dish') {
+            const invItem = STATE.recipeInventory.find(i => i.recipeId === recipe.id);
+            const totalAvailable = invItem ? (invItem.portions || 0) : 0;
+            const neededQuantity = 1;
+
             let status = 'success';
             if (totalAvailable < neededQuantity) {
-                mealStatus = 'Red'; // Missing entirely
+                mealStatus = 'Red';
                 status = 'error';
-            } else if (finalStageAvailable < neededQuantity) {
-                if (mealStatus !== 'Red') mealStatus = 'Blue';
-                status = 'warning';
             }
 
             allIngredients.push({
-                foodId: req.foodId,
-                foodName: food ? food.name : req.foodId,
+                foodId: recipe.id, // acts as foodId for UI compatibility
+                foodName: recipe.name,
                 needed: neededQuantity,
                 have: totalAvailable,
                 deficit: Math.max(0, neededQuantity - totalAvailable),
-                unit: food?.unit || '',
+                unit: ' portion(s)',
                 status: status,
-                needsPrep: status === 'warning'
+                needsPrep: false
             });
+        } else {
+            for (const req of recipe.ingredients) {
+                const food = STATE.foods.find(f => f.id === req.foodId);
+                const inv = STATE.inventory.find(i => i.foodId === req.foodId);
+                const neededQuantity = req.quantityPerPortion * recipe.portions;
+                
+                // Check total quantity across all stages
+                let totalAvailable = 0;
+                let finalStageAvailable = 0;
+                
+                if(inv) {
+                    const finalStageId = food.stages[food.stages.length - 1].id;
+                    finalStageAvailable = inv.stageQuantities[finalStageId] || 0;
+                    
+                    Object.values(inv.stageQuantities).forEach(qty => {
+                        totalAvailable += qty;
+                    });
+                }
+                
+                let status = 'success';
+                if (totalAvailable < neededQuantity) {
+                    mealStatus = 'Red'; // Missing entirely
+                    status = 'error';
+                } else if (finalStageAvailable < neededQuantity) {
+                    if (mealStatus !== 'Red') mealStatus = 'Blue';
+                    status = 'warning';
+                }
+
+                allIngredients.push({
+                    foodId: req.foodId,
+                    foodName: food ? food.name : req.foodId,
+                    needed: neededQuantity,
+                    have: totalAvailable,
+                    deficit: Math.max(0, neededQuantity - totalAvailable),
+                    unit: food?.unit || '',
+                    status: status,
+                    needsPrep: status === 'warning'
+                });
+            }
         }
 
         return {
@@ -297,40 +348,47 @@ function computeDashboardAlerts() {
         meal.ingredients.forEach(req => {
             if (req.status === 'success') return; // All good
 
-            const food = STATE.foods.find(f => f.id === req.foodId);
-            if (!food) return;
-
+            const isCompleteDish = meal.recipeId === req.foodId;
             let alertType, nextStageName, actionDate;
 
-            if (req.status === 'error') {
-                // Red: ingredient missing entirely
+            if (isCompleteDish) {
                 alertType = 'red';
-                // Action needed immediately (or as soon as possible)
-                // Use the earliest required prep stage deadline for action date
-                const earliestStage = food.stages[0]; // highest daysBefore (sorted desc in data)
-                const actionD = new Date(mealDate);
-                actionD.setDate(mealDate.getDate() - (earliestStage ? earliestStage.daysBefore : 0));
-                actionDate = actionD.toISOString().split('T')[0];
-                nextStageName = earliestStage ? earliestStage.name : 'Acquire';
+                actionDate = meal.date;
+                nextStageName = 'Stock Dish';
             } else {
-                // Blue: needs prep — find which stage to action next
-                alertType = 'blue';
-                const inv = STATE.inventory.find(i => i.foodId === req.foodId);
-                // Stages are stored sorted desc by daysBefore (start -> finish)
-                // Walk stages to find the first one that lacks sufficient quantity
-                let targetStage = null;
-                for (const stage of food.stages) {
-                    const qty = inv ? (inv.stageQuantities[stage.id] || 0) : 0;
-                    if (qty < req.needed) {
-                        targetStage = stage;
-                        break; // first deficient stage = what needs to be initiated
+                const food = STATE.foods.find(f => f.id === req.foodId);
+                if (!food) return;
+
+                if (req.status === 'error') {
+                    // Red: ingredient missing entirely
+                    alertType = 'red';
+                    // Action needed immediately (or as soon as possible)
+                    // Use the earliest required prep stage deadline for action date
+                    const earliestStage = food.stages[0]; // highest daysBefore (sorted desc in data)
+                    const actionD = new Date(mealDate);
+                    actionD.setDate(mealDate.getDate() - (earliestStage ? earliestStage.daysBefore : 0));
+                    actionDate = actionD.toISOString().split('T')[0];
+                    nextStageName = earliestStage ? earliestStage.name : 'Acquire';
+                } else {
+                    // Blue: needs prep — find which stage to action next
+                    alertType = 'blue';
+                    const inv = STATE.inventory.find(i => i.foodId === req.foodId);
+                    // Stages are stored sorted desc by daysBefore (start -> finish)
+                    // Walk stages to find the first one that lacks sufficient quantity
+                    let targetStage = null;
+                    for (const stage of food.stages) {
+                        const qty = inv ? (inv.stageQuantities[stage.id] || 0) : 0;
+                        if (qty < req.needed) {
+                            targetStage = stage;
+                            break; // first deficient stage = what needs to be initiated
+                        }
                     }
+                    if (!targetStage) targetStage = food.stages[food.stages.length - 1];
+                    nextStageName = targetStage.name;
+                    const actionD = new Date(mealDate);
+                    actionD.setDate(mealDate.getDate() - targetStage.daysBefore);
+                    actionDate = actionD.toISOString().split('T')[0];
                 }
-                if (!targetStage) targetStage = food.stages[food.stages.length - 1];
-                nextStageName = targetStage.name;
-                const actionD = new Date(mealDate);
-                actionD.setDate(mealDate.getDate() - targetStage.daysBefore);
-                actionDate = actionD.toISOString().split('T')[0];
             }
 
             const existing = alertMap[req.foodId];
@@ -408,6 +466,11 @@ function renderView(viewName) {
         const tpl = document.getElementById('tpl-dashboard').content.cloneNode(true);
         container.appendChild(tpl);
         renderDashboard();
+    } else if (viewName === 'mastery') {
+        const tpl = document.getElementById('tpl-mastery').content.cloneNode(true);
+        container.appendChild(tpl);
+        renderMastery();
+        setupMastery();
     } else {
         container.innerHTML = `<div style="color: var(--text-secondary); text-align: center; margin-top: 100px;">
             ${viewName} module is under construction (Phase 2).
@@ -730,7 +793,7 @@ function setupRecipeBuilder() {
         document.querySelector('#recipe-modal h2').textContent = 'Create Recipe';
         document.getElementById('recipe-name').value = '';
         document.getElementById('recipe-portions').value = 1;
-        document.getElementById('recipe-dish-type').value = '';
+        document.getElementById('recipe-dish-type').value = 'Component dish';
         document.getElementById('ingredient-builder-list').innerHTML = '';
         addIngredientRow(); // Start with one empty row
         document.getElementById('recipe-modal').classList.remove('hidden');
@@ -763,7 +826,7 @@ function openEditRecipeModal(recipeId) {
     document.querySelector('#recipe-modal h2').textContent = 'Edit Recipe';
     document.getElementById('recipe-name').value = recipe.name;
     document.getElementById('recipe-portions').value = recipe.portions;
-    document.getElementById('recipe-dish-type').value = recipe.dishType;
+    document.getElementById('recipe-dish-type').value = recipe.dishType || 'Component dish';
     document.getElementById('ingredient-builder-list').innerHTML = '';
     
     recipe.ingredients.forEach(ing => addIngredientRow(ing));
@@ -1208,6 +1271,54 @@ function renderInventory() {
         
         html += `</div>`;
     });
+
+    // Now render Complete Dishes if there are any
+    const completeRecipes = STATE.recipes.filter(r => r.dishType === 'Complete dish');
+    if (completeRecipes.length > 0) {
+        let recipesHtml = '';
+        completeRecipes.forEach(recipe => {
+            let invItem = STATE.recipeInventory.find(i => i.recipeId === recipe.id);
+            if (!invItem) {
+                invItem = { recipeId: recipe.id, portions: 0 };
+                STATE.recipeInventory.push(invItem);
+            }
+            const portions = invItem.portions || 0;
+            
+            recipesHtml += `
+                <div class="inventory-accordion-item" data-recipe-id="${recipe.id}">
+                    <div class="inventory-accordion-header">
+                        <div>
+                            <span>${recipe.name}</span>
+                            <span style="font-size: 12px; color: var(--text-secondary); margin-left: 12px;">Total: <span class="inv-recipe-total-sum">${portions}</span> portion(s)</span>
+                        </div>
+                        <i class="ph ph-caret-down accordion-icon"></i>
+                    </div>
+                    <div class="inventory-accordion-content" style="padding: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: 500; font-size: 14px;">Cooked & Ready Portions</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="number" 
+                                       class="inv-recipe-portions-input" 
+                                       data-recipe-id="${recipe.id}" 
+                                       value="${portions}" 
+                                       min="0" 
+                                       step="any"
+                                       style="width: 80px; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-family: inherit; text-align: center;">
+                                <span style="font-size: 12px; color: var(--text-secondary);">portions</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `
+            <div class="inventory-category">
+                <h3>Complete Dishes</h3>
+                ${recipesHtml}
+            </div>
+        `;
+    }
     
     list.innerHTML = html;
     
@@ -1240,6 +1351,34 @@ function renderInventory() {
             updateInventoryQuantity(foodId, stageId, newQty);
         });
     });
+
+    list.querySelectorAll('.inv-recipe-portions-input').forEach(input => {
+        input.addEventListener('change', (e) => {
+            const recipeId = e.target.dataset.recipeId;
+            const portions = parseFloat(e.target.value) || 0;
+            updateRecipeInventoryQuantity(recipeId, portions);
+        });
+    });
+}
+
+function updateRecipeInventoryQuantity(recipeId, newPortions) {
+    let invItem = STATE.recipeInventory.find(i => i.recipeId === recipeId);
+    if (!invItem) {
+        invItem = { recipeId, portions: 0 };
+        STATE.recipeInventory.push(invItem);
+    }
+    invItem.portions = newPortions;
+    runSimulation();
+    saveState();
+    
+    // Live update Total in header
+    const itemNode = document.querySelector(`.inventory-accordion-item[data-recipe-id="${recipeId}"]`);
+    if (itemNode) {
+        const totalSpan = itemNode.querySelector('.inv-recipe-total-sum');
+        if (totalSpan) {
+            totalSpan.textContent = newPortions % 1 === 0 ? newPortions : newPortions.toFixed(1);
+        }
+    }
 }
 
 function updateInventoryQuantity(foodId, stageId, newQty) {
@@ -1344,9 +1483,9 @@ window.app_deleteMeal = (mealId) => {
     }
 };
 
-window.app_jumpToInventory = (foodId) => {
+window.app_jumpToInventory = (id) => {
     renderView('inventory');
-    const item = document.querySelector(`.inventory-accordion-item[data-food-id="${foodId}"]`);
+    const item = document.querySelector(`.inventory-accordion-item[data-food-id="${id}"], .inventory-accordion-item[data-recipe-id="${id}"]`);
     if (item) {
         item.classList.add('open');
         item.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1451,6 +1590,118 @@ function renderDashboard() {
     });
 
     listEl.innerHTML = html;
+}
+
+// --- MASTERY MODULE ---
+
+function renderMastery() {
+    const list = document.getElementById('mastery-task-list');
+    if (!list) return;
+
+    const tasks = [...(STATE.masteryTasks || [])].sort((a, b) => {
+        const aNum = typeof a.prMinutes === 'number' ? a.prMinutes : Number.MAX_SAFE_INTEGER;
+        const bNum = typeof b.prMinutes === 'number' ? b.prMinutes : Number.MAX_SAFE_INTEGER;
+        return aNum - bNum;
+    });
+
+    if (tasks.length === 0) {
+        list.innerHTML = `
+            <div class="mastery-empty-state">
+                <i class="ph ph-trophy"></i>
+                <h3>No mastery tasks yet</h3>
+                <p>Add your first task and PR time to start tracking speed improvements.</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    tasks.forEach(task => {
+        html += `
+            <div class="recipe-item mastery-task-card" data-mastery-task-id="${task.id}">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                    <h3 style="margin: 0;">${task.name}</h3>
+                    <button class="icon-btn btn-delete-mastery-task" title="Delete Task" style="color: var(--color-red);">
+                        <i class="ph ph-trash"></i>
+                    </button>
+                </div>
+                <div class="mastery-pr-row">
+                    <span class="mastery-pr-label">PR Time</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="number"
+                               class="mastery-pr-input"
+                               data-mastery-task-id="${task.id}"
+                               min="0"
+                               step="0.1"
+                               value="${task.prMinutes}">
+                        <span class="mastery-pr-unit">min</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    list.innerHTML = html;
+}
+
+function setupMastery() {
+    const addBtn = document.getElementById('btn-add-mastery-task');
+    const nameInput = document.getElementById('mastery-task-name');
+    const prInput = document.getElementById('mastery-task-pr-minutes');
+    const list = document.getElementById('mastery-task-list');
+    if (!addBtn || !nameInput || !prInput || !list) return;
+
+    addBtn.addEventListener('click', () => {
+        const name = nameInput.value.trim();
+        const prMinutes = parseFloat(prInput.value);
+
+        if (!name) return alert('Task name is required');
+        if (Number.isNaN(prMinutes) || prMinutes < 0) return alert('PR time must be a valid number >= 0');
+
+        STATE.masteryTasks.push({
+            id: 'mt_' + Date.now(),
+            name,
+            prMinutes
+        });
+
+        nameInput.value = '';
+        prInput.value = '';
+        renderMastery();
+        saveState();
+    });
+
+    list.addEventListener('change', (e) => {
+        const input = e.target.closest('.mastery-pr-input');
+        if (!input) return;
+
+        const taskId = input.dataset.masteryTaskId;
+        const nextPr = parseFloat(input.value);
+        if (Number.isNaN(nextPr) || nextPr < 0) {
+            alert('PR time must be a valid number >= 0');
+            renderMastery();
+            return;
+        }
+
+        const task = STATE.masteryTasks.find(t => t.id === taskId);
+        if (!task) return;
+        task.prMinutes = nextPr;
+        saveState();
+        renderMastery();
+    });
+
+    list.addEventListener('click', (e) => {
+        const del = e.target.closest('.btn-delete-mastery-task');
+        if (!del) return;
+
+        const card = del.closest('.mastery-task-card');
+        if (!card) return;
+        const taskId = card.dataset.masteryTaskId;
+
+        if (!confirm('Delete this mastery task?')) return;
+        STATE.masteryTasks = STATE.masteryTasks.filter(t => t.id !== taskId);
+        saveState();
+        renderMastery();
+    });
 }
 window.renderDashboard = renderDashboard;
 
